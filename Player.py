@@ -14,7 +14,7 @@ class Player:
         self.homePathStartPosition = self.id * BASEOFFSET
         self.startPosition = self.homePathStartPosition + STARTOFFSET
 
-        self.pieces = [Piece(1, self), Piece(2, self), Piece(3, self), Piece(4, self)]
+        self.pieces = [Piece(0, self), Piece(1, self), Piece(2, self), Piece(3, self)]
 
         self.rank = None
         
