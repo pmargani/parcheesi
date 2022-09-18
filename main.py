@@ -68,6 +68,12 @@ def roll():
     d2 = random.randint(1,7)
     return d1, d2
 
+def isGameDone(players, turn, rolls):
+    if rolls is not None:
+        if len(rolls) <= turn:
+            return True
+    return allPlayersDone(players)
+            
 def moveSimple(player, die):
     if die == 5:
         # move a piece from base to start
@@ -101,12 +107,11 @@ def printBoard(players):
     print("*"*numCols)
                     
 
-def run():
+def play(numPlayers, rolls=None):
 
     # create players
     players = []
     winners = []
-    numPlayers = 4
     for i in range(numPlayers):
         p = Player(i)
         # start al pieces off board
@@ -135,8 +140,13 @@ def run():
                 print("  %s" % pc)
 
             # roll!
-            d1, d2 = roll()
+            if rolls is None:
+                d1, d2 = roll()
+            else:
+                d1, d2 = rolls[turn]
+
             print(" Roll: ", d1, d2)
+
             # move up to two pieces!
             # first move
             moveSimple(p, d1)
@@ -152,43 +162,30 @@ def run():
                 p.rank = len(winners) + 1
                 winners.append(p)
 
-            # everyone home?
-            gameDone = allPlayersDone(players)
-            if gameDone:
-                break
-
-            # second move
-
-            gameDone = allPlayersDone(players)
-            if gameDone:
-                break
-           
             # turn is done
             turn += 1
 
-            # print("turn ", turn, "len(rools)", len(rolls))
-            # if turn > (len(rolls) - 1):
-            #     print(" finished rolls!")
-            #     gameDone = True
-            #     break
-
-        ##gameDone = allPlayersDone(players)
+            # everyone home?
+            gameDone = isGameDone(players, turn, rolls)
+            if gameDone:
+                break
+        
         
 
 
     printBoard(players)
 
-    print("Everyone at home")
     print("Game Over")
     print("num turns: ", turn)
     print("winners: ")
     for i, p in enumerate(winners):
         print(i+1, " : ", str(p))
 
-
+    return players
 
 def main():
-    run()
+    rolls = [(5,5)]
+    play(4, rolls=rolls)
 
 
 
