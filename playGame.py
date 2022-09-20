@@ -5,6 +5,7 @@ import random
 import pygame
 
 from Constants import *
+from game import *
 from Player import Player
 
 WIDTH = 600
@@ -31,9 +32,9 @@ BASE_SIDE_OFFSET = 135
 bo = 260
 BASE_OFFSETS = [
     (0, 0),
-    (bo, 0),
+    (0, bo),
     (bo, bo),
-    (0, bo)
+    (bo, 0),
 
 ]
 
@@ -45,7 +46,17 @@ BASE_PIECE_OFFSETS = [
     (0, po)
 ]
 
+BOARD_START_X = 80
+BOARD_START_Y = 85
+BOARD_INNER_OFFSET = 262
+
+# draw lines to figure out board layour
+posWidth = 45
+posHeight = 16
+
+board = {}
 turn = 0
+playerTurn = 0
 players = []
 winners = []
 for i in range(NUMPLAYERS):
@@ -59,13 +70,7 @@ for i in range(NUMPLAYERS):
 
 def getBoardPositions():
     
-    BOARD_START_X = 80
-    BOARD_START_Y = 85
-    BOARD_INNER_OFFSET = 262
 
-    # draw lines to figure out board layour
-    posWidth = 45
-    posHeight = 16
 
     # y = WIDTH/2
     # x = WIDTH
@@ -146,6 +151,40 @@ def getBoardPositions():
 
 boardScreenPositions = getBoardPositions()
 
+def getHomePathScreenPos(boardPos, playerId):
+
+    homePathPos = abs(BOARDLENGTH - boardPos)
+    print("getHomePathScreenPos: ", boardPos, playerId, homePathPos)
+    
+    # player 0, is between lanes 1 and 8
+    if playerId == 0:
+        pos = (WIDTH/2 + 5 - (posWidth/2), BOARD_START_Y + (homePathPos*posHeight))
+
+    # between lanes 2 and 3
+    elif playerId == 1:
+        # pos = (BOARD_START_X + posHeight/2,WIDTH/2 - posWidth/2 + homePathPos*posWidth)
+        pos = (BOARD_START_X + posHeight/2+ homePathPos*posHeight, WIDTH/2 - posHeight )
+
+    elif playerId == 2:    
+        # pos = (WIDTH/2 + 5 - (posWidth/2), BOARD_START_Y + BOARD_INNER_OFFSET - (homePathPos*posHeight))
+        pos = (WIDTH/2 + 5 - (posWidth/2), BOARD_START_Y + BOARD_INNER_OFFSET*(3/2) - (homePathPos*posHeight))
+    
+        # pos = (WIDTH/2 + 5 - (posWidth/2), BOARD_START_Y + BOARD_INNER_OFFSET + 7*posHeight))
+    elif playerId == 3:
+        # pos = (BOARD_START_X  + BOARD_INNER_OFFSET + posHeight/2 + posHeight, WIDTH/2 - posWidth/2 - homePathPos*posWidth)
+        pos = (BOARD_START_X  + BOARD_INNER_OFFSET*(3/2) + posHeight/2 + posHeight  - homePathPos*posHeight, WIDTH/2 - posHeight)
+
+    else:
+        pos = (0, 0)
+    print("home path pos: ", pos)
+    return pos
+
+def getHomeScreenPos(playerId, pieceId):
+
+    x = BOARD_START_X + BOARD_INNER_OFFSET*5/8 + pieceId*25
+    y = BOARD_START_X + BOARD_INNER_OFFSET*5/8 + playerId*25
+    return x, y
+
 def getScreenPosition(boardPos, pieceId, playerId):
     # print("getScreenPosition ", pieceId, playerId)
     if boardPos == BASE:
@@ -156,7 +195,13 @@ def getScreenPosition(boardPos, pieceId, playerId):
         pos = (posX, posY)
     elif boardPos < len(boardScreenPositions):
         pos = boardScreenPositions[boardPos]
-    else:
+    elif boardPos > len(boardScreenPositions) and boardPos < HOME:
+        # must be home path.
+        pos = getHomePathScreenPos(boardPos, playerId)
+    elif boardPos == HOME:
+        # at home    
+        pos = getHomeScreenPos(playerId, pieceId)
+    else:    
         # TBF:
         pos = (500,500)    
     return pos
@@ -173,7 +218,7 @@ def on_mouse_down(pos, button):
     print("Mouse button", button, "clicked at", pos)
 
 def draw():
-    global players
+    global players, board
 
     # screen.blit("background", (0,0))
     screen.fill((128,0,0))
@@ -184,40 +229,36 @@ def draw():
         for pc in p.pieces:
             drawPiece(p, pc)
 
-def allPlayersDone(players):
-    "Do all the players have all their pieces at home"
+    # draw the home paths for debugging.
+    # homePathPos = 1
+    # s = (WIDTH/2 + 5 - (posWidth/2), BOARD_START_Y + (homePathPos*posHeight))
+    # homePathPos = 8
+    # e = (WIDTH/2 + 5 - (posWidth/2), BOARD_START_Y + (homePathPos*posHeight))
+    # screen.draw.line(s, e, color='black')
+
+    # homePathPos = 1
+    # pos = (BOARD_START_X + posHeight/2+ homePathPos*posHeight, WIDTH/2 - posHeight )
+    # homePathPos = 8
+    # e = (BOARD_START_X + posHeight/2 + homePathPos*posHeight, WIDTH/2 - posHeight )
+    # screen.draw.line(pos, e, color='black')
+
+    # homePathPos = 1
+    # pos = (WIDTH/2 + 5 - (posWidth/2), BOARD_START_Y + BOARD_INNER_OFFSET*(3/2) - (homePathPos*posHeight))
+    # homePathPos = 8
+    # e = (WIDTH/2 + 5 - (posWidth/2), BOARD_START_Y + BOARD_INNER_OFFSET*(3/2) - (homePathPos*posHeight))
+    # screen.draw.line(pos, e, color='black')
+    
+    # homePathPos = 1
+    # pos = (BOARD_START_X  + BOARD_INNER_OFFSET*(3/2) + posHeight/2 + posHeight  - homePathPos*posHeight, WIDTH/2 - posHeight)
+    # homePathPos = 8
+    # e = (BOARD_START_X  + BOARD_INNER_OFFSET*(3/2) + posHeight/2 + posHeight  - homePathPos*posHeight, WIDTH/2 - posHeight)
+    # screen.draw.line(pos, e, color='black')
 
 
-    for p in players:
-        if not p.allPiecesAtHome():
-            return False
-    return True
-
-def roll():
-    d1 = random.randint(1,7)
-    d2 = random.randint(1,7)
-    return d1, d2
-
-def isGameDone(players, turn, rolls):
-    if rolls is not None:
-        if len(rolls) <= turn:
-            return True
-    return allPlayersDone(players)
-            
-def moveSimple(player, die):
-    if die == 5:
-        # move a piece from base to start
-        player.movePieceToStart()
-        return
-    # move any piece past start forward  
-    for pc in player.pieces:
-        if pc.isOnBoard():
-            pc.advancePosition(die)
-            break   
     
 def update(time_interval):
     # global bullets, tanks, rubble
-    global turn, players, winners
+    global turn, playerTurn, players, winners
 
     now = time.time()
 
@@ -226,15 +267,17 @@ def update(time_interval):
 
     rolls = None
     
-    for p in players:
 
-        # players that are done don't get a turn
-        if p.allPiecesAtHome():
-            continue
+    p = players[playerTurn]
 
-        print("Turn %d for %s" % (turn, p))
-        for pc in p.pieces:
-            print("  %s" % pc)
+        
+
+    print("Turn %d for %s" % (turn, p))
+    for pc in p.pieces:
+        print("  %s" % pc)
+
+    # players that are done don't get a turn
+    if not p.allPiecesAtHome():
 
         # roll!
         if rolls is None:
@@ -255,17 +298,21 @@ def update(time_interval):
         #    p.movePieceToStart()
         moveSimple(p, d2)    
 
-        if p.allPiecesAtHome():
-            p.rank = len(winners) + 1
-            winners.append(p)
+    if p.allPiecesAtHome():
+        p.rank = len(winners) + 1
+        winners.append(p)
 
-        # turn is done
-        turn += 1
+    # turn is done
+    turn += 1
 
-        # everyone home?
-        gameDone = isGameDone(players, turn, rolls)
-        if gameDone:
-            break
+    playerTurn += 1
+    if playerTurn > NUMPLAYERS-1:
+        playerTurn = 0
 
-    time.sleep(1)
+    # everyone home?
+    gameDone = isGameDone(players, turn, rolls)
+    if gameDone:
+        return
+
+    time.sleep(.25)
     
