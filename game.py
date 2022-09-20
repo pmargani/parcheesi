@@ -1,5 +1,7 @@
 import random
 
+from Constants import *
+
 def allPlayersDone(players):
     "Do all the players have all their pieces at home"
 
