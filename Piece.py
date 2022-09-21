@@ -13,6 +13,9 @@ class Piece:
 
         self.position = BASE
 
+        self.kills = 0
+        self.deaths = 0
+        
     def __str__(self):
         return "Piece %d (%d) at position %d" % (self.id, self.player.id, self.position)
 

@@ -11,6 +11,8 @@ from Player import Player
 WIDTH = 600
 HEIGHT = 800
 
+STATUS_HEIGHT = 200
+
 NUMPLAYERS = 4
 
 PIECE_RADIUS = 10
@@ -270,6 +272,17 @@ def draw():
         for pc in p.pieces:
             drawPiece(p, pc, board)
 
+        x = (WIDTH/4) * p.id
+        yBase = HEIGHT - STATUS_HEIGHT
+        yStep = 25
+        pos = (x, yBase)
+        screen.draw.text("Player %d" % p.id, pos)
+        screen.draw.text("Rank: %s" % p.rank, (x, yBase+yStep), fontsize=16)
+        for pc in p.pieces:
+            pos = (x, yBase+(yStep*(pc.id+2)))
+            txt = "PC %d Pos: %d K: %d D: %d" % (pc.id, pc.position, pc.kills, pc.deaths)
+            screen.draw.text(txt, pos, fontsize=16) 
+
     # draw the home paths for debugging.
     # homePathPos = 1
     # s = (WIDTH/2 + 5 - (posWidth/2), BOARD_START_Y + (homePathPos*posHeight))
@@ -340,8 +353,9 @@ def update(time_interval):
         moveSimple(p, d2, board)    
 
     if p.allPiecesAtHome():
-        p.rank = len(winners) + 1
-        winners.append(p)
+        if p.rank is None:
+            p.rank = len(winners) + 1
+            winners.append(p)
 
     # turn is done
     turn += 1
