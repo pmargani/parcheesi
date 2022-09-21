@@ -6,6 +6,21 @@ from Player import Player
 
 class TestPiece(unittest.TestCase):
 
+    def test_Piece(self):
+        p0 = Player(0 , 'color')
+        pc0 = Piece(0, p0)
+        pc02 = Piece(0, p0)
+
+        self.assertEqual(pc0, pc02)
+
+        # p = Player(0 , 'color')
+        pc1 = Piece(1, p0)        
+        self.assertNotEqual(pc0, pc1)
+
+        p1 = Player(1 , 'color')
+        pc01 = Piece(0, p1)
+        self.assertNotEqual(pc0, pc01)
+
     def test_piecePlayer0(self):
         p = Player(0 , 'color')
         pc = Piece(0, p)

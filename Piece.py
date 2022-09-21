@@ -14,7 +14,14 @@ class Piece:
         self.position = BASE
 
     def __str__(self):
-        return "Piece %d at position %d" % (self.id, self.position)
+        return "Piece %d (%d) at position %d" % (self.id, self.player.id, self.position)
+
+    def __repr__(self):
+        return "Piece %d (%d) at position %d" % (self.id, self.player.id, self.position)
+
+
+    def __eq__(self, other):
+        return self.id == other.id and self.player == other.player
 
     def relativePosition(self, pos = None, fromPos = None):
         "How far has piece moved since start?"

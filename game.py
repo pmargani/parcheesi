@@ -21,16 +21,33 @@ def isGameDone(players, turn, rolls):
         if len(rolls) <= turn:
             return True
     return allPlayersDone(players)
-            
-def moveSimple(player, die):
-    if die == 5:
+
+def updateBoard(piece, oldPos, newPos, board):
+
+    if oldPos in board:
+        # find piece and remove it
+        for i, pc in enumerate(board[oldPos]):
+            if pc == piece:
+                board[oldPos].pop(i)
+    if newPos not in board:
+        board[newPos] = []
+    board[newPos].append(piece)
+                                
+def moveSimple(player, die, board):
+    if die == 5 and player.hasPieceAtBase():
         # move a piece from base to start
-        player.movePieceToStart()
+        pc = player.movePieceToStart()
+        if pc.startPosition not in board:
+            board[pc.startPosition] = []
+        board[pc.startPosition].append(pc)   
         return
     # move any piece past start forward  
     for pc in player.pieces:
         if pc.isOnBoard():
+            oldPos = pc.position
             pc.advancePosition(die)
+            newPos = pc.position
+            updateBoard(pc, oldPos, newPos, board)
             break   
 
 def printBoard(players):

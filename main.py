@@ -1,4 +1,5 @@
 import random
+from pprint import pprint
 
 # one of four corners
 # start (safe) - 1
@@ -64,6 +65,8 @@ from Piece import Piece
                     
 
 def play(numPlayers, rolls=None):
+    
+    board = {}
 
     # create players
     players = []
@@ -82,6 +85,8 @@ def play(numPlayers, rolls=None):
 
     while not gameDone:
         printBoard(players)
+        pprint(board)
+
         # take turns
         for p in players:
             if gameDone:
@@ -105,14 +110,14 @@ def play(numPlayers, rolls=None):
 
             # move up to two pieces!
             # first move
-            moveSimple(p, d1)
+            moveSimple(p, d1, board)
             #if d1 == 5:
                 # move a piece from base to start
             #    p.movePieceToStart()
             #if d2 == 5:
                 # move a piece from base to start
             #    p.movePieceToStart()
-            moveSimple(p, d2)    
+            moveSimple(p, d2, board)    
 
             if p.allPiecesAtHome():
                 p.rank = len(winners) + 1

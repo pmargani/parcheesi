@@ -206,9 +206,50 @@ def getScreenPosition(boardPos, pieceId, playerId):
         pos = (500,500)    
     return pos
 
-def drawPiece(player, piece):
+def makePiecePositionOffset(i, pos, screenPos, playerId):
+
+    if i == 0:
+        return screenPos
+
+    offset = PIECE_RADIUS*2
+    x, y = screenPos
+
+    if pos >= 0 and pos < BOARDLENGTH/8:
+        xOff = i*offset
+        yOff = 0
+    elif pos >= BOARDLENGTH/8 and pos < (BOARDLENGTH*3)/8:
+        xOff = 0
+        yOff = i*offset      
+    elif pos >= (BOARDLENGTH*3)/8 and pos < (BOARDLENGTH*5)/8:
+        xOff = i*offset
+        yOff = 0
+    elif pos >= (BOARDLENGTH*5)/8 and pos < (BOARDLENGTH*7)/8:
+        xOff = 0
+        yOff = i*offset
+    elif pos < BOARDLENGTH:
+        xOff = i*offset
+        yOff = 0
+    elif pos >= BOARDLENGTH:
+        if playerId in [0, 2]:
+            xOff = i*offset
+            yOff = 0
+        else:        
+            xOff = 0
+            yOff = i*offset
+
+    return x + xOff, y + yOff
+            
+def drawPiece(player, piece, board):
     screen_pos = getScreenPosition(piece.position, piece.id, player.id)
 
+    if piece.position != BASE and piece.position < HOME:
+        # how many other pieces on this position?
+        for i, pc in enumerate(board[piece.position]):
+            if pc == piece:
+                break
+
+        screen_pos = makePiecePositionOffset(i, piece.position, screen_pos, player.id)
+    
     screen.draw.filled_circle(screen_pos, PIECE_RADIUS, SCREEN_COLORS[player.color])
     tx, ty = screen_pos
     offset = 4
@@ -227,7 +268,7 @@ def draw():
 
     for p in players:
         for pc in p.pieces:
-            drawPiece(p, pc)
+            drawPiece(p, pc, board)
 
     # draw the home paths for debugging.
     # homePathPos = 1
@@ -289,14 +330,14 @@ def update(time_interval):
 
         # move up to two pieces!
         # first move
-        moveSimple(p, d1)
+        moveSimple(p, d1, board)
         #if d1 == 5:
             # move a piece from base to start
         #    p.movePieceToStart()
         #if d2 == 5:
             # move a piece from base to start
         #    p.movePieceToStart()
-        moveSimple(p, d2)    
+        moveSimple(p, d2, board)    
 
     if p.allPiecesAtHome():
         p.rank = len(winners) + 1
