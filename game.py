@@ -12,8 +12,8 @@ def allPlayersDone(players):
     return True
 
 def roll():
-    d1 = random.randint(1,7)
-    d2 = random.randint(1,7)
+    d1 = random.randint(1,6)
+    d2 = random.randint(1,6)
     return d1, d2
 
 def isGameDone(players, turn, rolls):
@@ -31,7 +31,22 @@ def updateBoard(piece, oldPos, newPos, board):
                 board[oldPos].pop(i)
     if newPos not in board:
         board[newPos] = []
+    elif len(board[newPos]) > 0 and newPos < BOARDLENGTH and newPos != SAFE_POSITIONS:
+        # there's other pieces here?  Any from other team?
+        # TBF: arbitrarly pick first one
+        otherPiece = board[newPos][0]
+        if otherPiece.player.id != piece.player.id:
+            # back to base!
+            print("Kill by %s on %s" % (piece, otherPiece))
+            otherPiece.deaths += 1
+            otherPiece.position = BASE
+            board[newPos].pop(0)
+            piece.kills += 1
+
+
     board[newPos].append(piece)
+
+    # remove other piece first
                                 
 def moveSimple(player, die, board):
     if die == 5 and player.hasPieceAtBase():

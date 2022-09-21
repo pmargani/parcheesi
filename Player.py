@@ -53,3 +53,10 @@ class Player:
             if not p.atHome():
                 return False
         return True
+
+    def getKills(self):
+        return sum([pc.kills for pc in self.pieces])
+
+    def getDeaths(self):
+        return sum([pc.deaths for pc in self.pieces])
+            

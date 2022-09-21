@@ -11,7 +11,7 @@ from Player import Player
 WIDTH = 600
 HEIGHT = 800
 
-STATUS_HEIGHT = 200
+STATUS_HEIGHT = 250
 
 NUMPLAYERS = 4
 
@@ -61,6 +61,7 @@ turn = 0
 playerTurn = 0
 players = []
 winners = []
+d1 = d2 = None
 for i in range(NUMPLAYERS):
     p = Player(i)
     # start al pieces off board
@@ -261,25 +262,40 @@ def on_mouse_down(pos, button):
     print("Mouse button", button, "clicked at", pos)
 
 def draw():
-    global players, board
+    global players, board, d1, d2
 
     # screen.blit("background", (0,0))
     screen.fill((128,0,0))
 
     screen.blit("parcheesi_board2", (0,0))
 
+    row = 0
+    yBase = HEIGHT - STATUS_HEIGHT 
+    yStep = 25
+    screen.draw.text("Roll: %d %d" % (d1, d2), (0, yBase))
+
     for p in players:
+
         for pc in p.pieces:
             drawPiece(p, pc, board)
 
         x = (WIDTH/4) * p.id
-        yBase = HEIGHT - STATUS_HEIGHT
-        yStep = 25
-        pos = (x, yBase)
+        row = 1
+        pos = (x, yBase + (row*yStep))
         screen.draw.text("Player %d" % p.id, pos)
-        screen.draw.text("Rank: %s" % p.rank, (x, yBase+yStep), fontsize=16)
+
+        row += 1
+        screen.draw.text("Rank: %s" % p.rank, (x, yBase+(yStep*row)), fontsize=16)
+        
+        row += 1
+        screen.draw.text("Kills: %d" % p.getKills(), (x, yBase+(yStep*row)), fontsize=16)
+
+        row += 1
+        screen.draw.text("Deaths: %d" % p.getDeaths(), (x, yBase+(yStep*row)), fontsize=16)
+               
         for pc in p.pieces:
-            pos = (x, yBase+(yStep*(pc.id+2)))
+            row += 1
+            pos = (x, yBase+(yStep*row))
             txt = "PC %d Pos: %d K: %d D: %d" % (pc.id, pc.position, pc.kills, pc.deaths)
             screen.draw.text(txt, pos, fontsize=16) 
 
@@ -312,7 +328,7 @@ def draw():
     
 def update(time_interval):
     # global bullets, tanks, rubble
-    global turn, playerTurn, players, winners
+    global turn, playerTurn, players, winners, d1, d2
 
     now = time.time()
 
