@@ -80,6 +80,48 @@ class TestMain(unittest.TestCase):
                 else:    
                     self.assertEqual(pos[i], p.pieces[i].position)
 
+    def test_play6(self):
+        "1 player blocks itself from getting out"
+
+        s = START_ROLL
+        rolls = [(s,s),(s,s)]
+
+        players = play(1, rolls=rolls)
+
+        # first roll, first two pieces get out of base
+        # second roll, first piece move forward 5,
+        # then the third piece gets out
+        pos = [STARTOFFSET + 5, STARTOFFSET, STARTOFFSET, BASE]
+        p0 = players[0]
+        for i in range(len(pos)):
+            self.assertEqual(pos[i], p0.pieces[i].position)
+
+    def test_play7(self):
+        "Player 2 blocks Player 1"
+
+        s = START_ROLL
+        # player 1 gets a piece out and tries to advance
+        p0rolls = [(s,6),(4,6),(6,6)]
+        # player 2 gets all it's pieces out, and current algorithm
+        # keeps two pieces at it's start
+        p1rolls = [(s,s),(s,s),(s,s)]
+        rolls = []
+        for i in range(len(p0rolls)):
+            rolls.append(p0rolls[i])
+            rolls.append(p1rolls[i])
+
+        players = play(2, rolls=rolls)
+        
+        # for p in players:
+        #     print("%s" % p)
+        #     for pc in p.pieces:
+        #         print("%s" % pc)
+
+        # see how player1 couldn't get past player2's start
+        pos = [21, BASE, BASE, BASE]
+        p0 = players[0]
+        for i in range(len(pos)):
+            self.assertEqual(pos[i], p0.pieces[i].position)   
 
 if __name__ == '__main__':
     unittest.main()            

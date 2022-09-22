@@ -271,7 +271,7 @@ def draw():
 
     row = 0
     yBase = HEIGHT - STATUS_HEIGHT 
-    yStep = 25
+    yStep = 20
     screen.draw.text("Roll: %d %d" % (d1, d2), (0, yBase))
 
     for p in players:
@@ -292,7 +292,13 @@ def draw():
 
         row += 1
         screen.draw.text("Deaths: %d" % p.getDeaths(), (x, yBase+(yStep*row)), fontsize=16)
-               
+        
+        row += 1
+        screen.draw.text("Blocked: %d" % p.blocked, (x, yBase+(yStep*row)), fontsize=16)
+
+        row += 1
+        screen.draw.text("Turns: %d" % p.turns, (x, yBase+(yStep*row)), fontsize=16)
+
         for pc in p.pieces:
             row += 1
             pos = (x, yBase+(yStep*row))
@@ -359,14 +365,22 @@ def update(time_interval):
 
         # move up to two pieces!
         # first move
-        moveSimple(p, d1, board)
+        moved = moveLegal(p, d1, board)
+        if not moved:
+            print("%s could not move %d" % (p, d1))
+            p.blocked += 1
+
+
         #if d1 == 5:
             # move a piece from base to start
         #    p.movePieceToStart()
         #if d2 == 5:
             # move a piece from base to start
         #    p.movePieceToStart()
-        moveSimple(p, d2, board)    
+        moved = moveLegal(p, d2, board)    
+        if not moved:
+            print("%s could not move %d" % (p, d1))
+            p.blocked += 1
 
     if p.allPiecesAtHome():
         if p.rank is None:
@@ -375,6 +389,7 @@ def update(time_interval):
 
     # turn is done
     turn += 1
+    p.turns += 1
 
     playerTurn += 1
     if playerTurn > NUMPLAYERS-1:
@@ -386,4 +401,5 @@ def update(time_interval):
         return
 
     time.sleep(.25)
+    # x = input()
     

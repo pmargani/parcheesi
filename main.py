@@ -110,14 +110,21 @@ def play(numPlayers, rolls=None):
 
             # move up to two pieces!
             # first move
-            moveSimple(p, d1, board)
+            moved = moveLegal(p, d1, board)
+            
+            if not moved:
+                print("%s could not move %d" % (p, d1))
+                p.blocked += 1
             #if d1 == 5:
                 # move a piece from base to start
             #    p.movePieceToStart()
             #if d2 == 5:
                 # move a piece from base to start
             #    p.movePieceToStart()
-            moveSimple(p, d2, board)    
+            moved = moveLegal(p, d2, board)    
+            if not moved:
+                print("%s could not move %d" % (p, d1))
+                p.blocked += 1
 
             if p.allPiecesAtHome():
                 p.rank = len(winners) + 1
@@ -139,6 +146,9 @@ def play(numPlayers, rolls=None):
     print("Game Over")
     print("num turns: ", turn)
     print("winners: ")
+    for p in players:
+        print("%s" % p)
+        print("  was blocked %d times" % p.blocked)
     for i, p in enumerate(winners):
         print(i+1, " : ", str(p))
 

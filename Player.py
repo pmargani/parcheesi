@@ -17,6 +17,8 @@ class Player:
         self.pieces = [Piece(0, self), Piece(1, self), Piece(2, self), Piece(3, self)]
 
         self.rank = None
+        self.blocked = 0
+        self.turns = 0
         
     def __str__(self):
         return "Player %d (%s)" % (self.id, self.color)
