@@ -16,9 +16,9 @@ def roll():
     d2 = random.randint(1,6)
     return d1, d2
 
-def isGameDone(players, turn, rolls):
+def isGameDone(players, rollIdx, rolls):
     if rolls is not None:
-        if len(rolls) <= turn:
+        if len(rolls) <= rollIdx:
             return True
     return allPlayersDone(players)
 
@@ -79,6 +79,14 @@ def startIsOpen(player, board):
         # it's full!
         return False
 
+def removeFromBoard(piece, board):
+
+    pcs = board[piece.position]
+    for i, pc in enumerate(pcs):
+        if pc == piece:
+            pcs.pop(i)
+            break
+
 def numPiecesOnBoardPos(pos, piece, board):
     if pos not in board:
         return 0
@@ -127,6 +135,13 @@ def moveLegal(player, die, board):
                     moved = True
                     break 
     return moved
+
+def loseBestPiece(player, board):
+
+    bestPiece = player.getBestPieceOnBoard()
+    # send it back!
+    removeFromBoard(bestPiece, board)
+    bestPiece.position = BASE
 
 def printBoard(players):
     "Use ascii art to represent 1 base + 64 positions + 8 home path + 1 home for each piece"

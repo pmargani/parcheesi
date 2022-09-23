@@ -15,7 +15,7 @@ class Piece:
 
         self.kills = 0
         self.deaths = 0
-        
+
     def __str__(self):
         return "Piece %d (%d) at position %d" % (self.id, self.player.id, self.position)
 
@@ -48,7 +48,26 @@ class Piece:
 
     def atHome(self):
         return self.position >= HOME
+
+    def isInHomePath(self):
+        return self.position > BOARDLENGTH and self.position < HOME    
     
+    def isOnMainBoard(self):
+        return self.isOnBoard() and not self.isInHomePath()
+
+    def distanceFromStart(self):
+        "How far has this piece traveled since it started?"
+        if self.atBase():
+            return 0
+        if self.isInHomePath() or self.atHome():  
+            return self.position - STARTOFFSET
+        # piece is on main board       
+        if self.position >= self.startPosition:
+            return self.position - self.startPosition
+        else:
+            # take wrap around into account
+            return (BOARDLENGTH - self.startPosition) + self.position 
+
     def advancePosition(self, step):
         """
         Move the piece forward, but make sure we take into
@@ -83,15 +102,15 @@ class Piece:
             return newPos
                     
         if pos <= self.homePathStartPosition and nextPos > self.homePathStartPosition:
-            print("move into home path")
+            # print("move into home path")
             diff = self.homePathStartPosition - pos
             newPos = BOARDLENGTH + step - diff
         elif pos <= BOARDLENGTH and nextPos > BOARDLENGTH:
-            print("wrapping around ", nextPos)
+            # print("wrapping around ", nextPos)
             newPos = nextPos - BOARDLENGTH
 
         else:
-            print("simple advance")
+            # print("simple advance")
             newPos = nextPos
             # once you get past home, you're home
             if newPos > HOME:

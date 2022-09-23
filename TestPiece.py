@@ -21,6 +21,52 @@ class TestPiece(unittest.TestCase):
         pc01 = Piece(0, p1)
         self.assertNotEqual(pc0, pc01)
 
+        self.assertTrue(pc0.atBase())    
+        self.assertFalse(pc0.atHome())   
+        self.assertFalse(pc0.isOnBoard())
+        self.assertFalse(pc0.isOnMainBoard())
+        
+        self.assertEqual(pc0.distanceFromStart(), 0)
+
+        # move piece around and tst stuff
+        pc0.position = pc0.startPosition
+
+        self.assertFalse(pc0.atBase())    
+        self.assertFalse(pc0.atHome())   
+        self.assertTrue(pc0.isOnBoard())
+        self.assertTrue(pc0.isOnMainBoard())
+        self.assertEqual(pc0.distanceFromStart(), 0)
+        
+        pc0.position += 1
+
+        self.assertFalse(pc0.atBase())    
+        self.assertFalse(pc0.atHome())   
+        self.assertTrue(pc0.isOnBoard())
+        self.assertTrue(pc0.isOnMainBoard())
+        self.assertEqual(pc0.distanceFromStart(), 1)
+
+        # keep it on main board
+        nextPos = BOARDLENGTH - pc0.startPosition - 2
+        pc0.position += nextPos
+        # print("pc0.position:   ", pc0.position, pc0.position - pc0.startPosition)
+
+        self.assertFalse(pc0.atBase())    
+        self.assertFalse(pc0.atHome())   
+        self.assertFalse(pc0.isInHomePath())   
+        self.assertTrue(pc0.isOnBoard())
+        self.assertTrue(pc0.isOnMainBoard())
+        self.assertEqual(pc0.distanceFromStart(), nextPos + 1)
+               
+        # now get into home path
+        pc0.position += 3
+
+        self.assertFalse(pc0.atBase())    
+        self.assertFalse(pc0.atHome())   
+        self.assertTrue(pc0.isInHomePath())   
+        self.assertTrue(pc0.isOnBoard())
+        self.assertFalse(pc0.isOnMainBoard())
+        self.assertEqual(pc0.distanceFromStart(), nextPos + 1 + 3)
+
     def test_piecePlayer0(self):
         p = Player(0 , 'color')
         pc = Piece(0, p)

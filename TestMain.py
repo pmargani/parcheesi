@@ -6,15 +6,15 @@ from main import play
 class TestMain(unittest.TestCase):
 
     def test_play1(self):
-        "One player gets two pieces out"
+        "One player gets two pieces out with doubles"
 
         s = START_ROLL
-        rolls = [(s,s)]
+        rolls = [(s,s),(1,2)]
 
         players = play(1, rolls=rolls)
 
         # first 2 pieces will be on start, others at base
-        pos = [STARTOFFSET, STARTOFFSET, BASE, BASE]
+        pos = [STARTOFFSET+3, STARTOFFSET, BASE, BASE]
         p0 = players[0]
         for i in range(len(pos)):
             self.assertEqual(pos[i], p0.pieces[i].position)
@@ -23,11 +23,11 @@ class TestMain(unittest.TestCase):
         "One player advances one piece"
 
         s = START_ROLL
-        rolls = [(s,s),(1,2)]
+        rolls = [(s,s),(1,2),(1,2)]
 
         players = play(1, rolls=rolls)
 
-        pos = [STARTOFFSET + 3, STARTOFFSET, BASE, BASE]
+        pos = [STARTOFFSET + 6, STARTOFFSET, BASE, BASE]
         p0 = players[0]
         for i in range(len(pos)):
             self.assertEqual(pos[i], p0.pieces[i].position)          
@@ -36,8 +36,9 @@ class TestMain(unittest.TestCase):
         "One player gets one piece home"
 
         s = START_ROLL
-        sixes = (6, 6)
-        rolls = [(s,6),sixes, sixes, sixes, sixes, sixes, sixes]
+        sixes = (6, 4)
+        rolls = [(s,6)]
+        rolls.extend([sixes]*10) #,sixes, sixes, sixes, sixes, sixes, sixes]
 
         players = play(1, rolls=rolls)
 
@@ -50,13 +51,13 @@ class TestMain(unittest.TestCase):
         "One player gets one piece home and moves a second piece"
 
         s = START_ROLL
-        sixes = (6, 6)
-        rolls = [(s,s)]
+        sixes = (6, 4)
+        rolls = [(s,6),(s,6)]
         rolls.extend([sixes]*7)
 
         players = play(1, rolls=rolls)
 
-        pos = [HOME, STARTOFFSET+12, BASE, BASE]
+        pos = [HOME, STARTOFFSET+10, BASE, BASE]
         p0 = players[0]
         for i in range(len(pos)):
             self.assertEqual(pos[i], p0.pieces[i].position)
@@ -65,9 +66,10 @@ class TestMain(unittest.TestCase):
         "4 players move identically"
 
         s = START_ROLL
-        ss = (s,s)
-        sixes = (6, 6)
-        rolls = [ss, ss, ss, ss, sixes, sixes, sixes, sixes]
+        ss = (s,6)
+        sixes = (6, 4)
+        # rolls = [ss, ss, ss, ss, sixes, sixes, sixes, sixes]
+        rolls = [ss] * 8
 
         players = play(4, rolls=rolls)
         rolls
@@ -81,17 +83,14 @@ class TestMain(unittest.TestCase):
                     self.assertEqual(pos[i], p.pieces[i].position)
 
     def test_play6(self):
-        "1 player blocks itself from getting out"
+        "1 player blocks itself"
 
         s = START_ROLL
-        rolls = [(s,s),(s,s)]
+        rolls = [(s,6),(s,6),(s,6),(s,6)]
 
         players = play(1, rolls=rolls)
 
-        # first roll, first two pieces get out of base
-        # second roll, first piece move forward 5,
-        # then the third piece gets out
-        pos = [STARTOFFSET + 5, STARTOFFSET, STARTOFFSET, BASE]
+        pos = [STARTOFFSET + 6*4 + 5, STARTOFFSET, STARTOFFSET, BASE]
         p0 = players[0]
         for i in range(len(pos)):
             self.assertEqual(pos[i], p0.pieces[i].position)
@@ -101,10 +100,10 @@ class TestMain(unittest.TestCase):
 
         s = START_ROLL
         # player 1 gets a piece out and tries to advance
-        p0rolls = [(s,6),(4,6),(6,6)]
+        p0rolls = [(s,6),(1,2),(1,2),(1,2),(4,6),(4,6)]
         # player 2 gets all it's pieces out, and current algorithm
         # keeps two pieces at it's start
-        p1rolls = [(s,s),(s,s),(s,s)]
+        p1rolls = [(s,1),(s,1),(s,1),(1,2),(1,2),(1,2)]
         rolls = []
         for i in range(len(p0rolls)):
             rolls.append(p0rolls[i])
@@ -118,10 +117,12 @@ class TestMain(unittest.TestCase):
         #         print("%s" % pc)
 
         # see how player1 couldn't get past player2's start
-        pos = [21, BASE, BASE, BASE]
+        pos = [20, BASE, BASE, BASE]
         p0 = players[0]
         for i in range(len(pos)):
             self.assertEqual(pos[i], p0.pieces[i].position)   
+
+        self.assertEqual(p0.blocked, 4)
 
 if __name__ == '__main__':
     unittest.main()            

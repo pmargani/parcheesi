@@ -82,6 +82,7 @@ def play(numPlayers, rolls=None):
     gameDone = False
 
     turn = 0
+    rollIdx = 0
 
     while not gameDone:
         printBoard(players)
@@ -101,30 +102,47 @@ def play(numPlayers, rolls=None):
                 print("  %s" % pc)
 
             # roll!
-            if rolls is None:
-                d1, d2 = roll()
-            else:
-                d1, d2 = rolls[turn]
+            doubles = 0
+            rolling = True
+            while rolling:
 
-            print(" Roll: ", d1, d2)
+                if rolls is None:
+                    d1, d2 = roll()
+                else:
+                    d1, d2 = rolls[rollIdx]
+                    rollIdx += 1
 
-            # move up to two pieces!
-            # first move
-            moved = moveLegal(p, d1, board)
-            
-            if not moved:
-                print("%s could not move %d" % (p, d1))
-                p.blocked += 1
-            #if d1 == 5:
-                # move a piece from base to start
-            #    p.movePieceToStart()
-            #if d2 == 5:
-                # move a piece from base to start
-            #    p.movePieceToStart()
-            moved = moveLegal(p, d2, board)    
-            if not moved:
-                print("%s could not move %d" % (p, d1))
-                p.blocked += 1
+                print(" Roll: ", d1, d2)
+
+                # check for doubles
+                if d1 != d2:
+                    # no doubles, turn is over
+                    rolling = False
+                else:
+                    # keep track of how many
+                    # doulbes we get, cause we die
+                    # after 3
+                    doubles += 1
+                    if doubles >= 3:
+                        print("Third doubles!", d1, d2)
+                        loseBestPiece(p, board)
+                        rolling = False
+                        break
+
+                # move up to two pieces!
+                # first move
+                moved = moveLegal(p, d1, board)
+                if not moved:
+                    print("%s could not move %d" % (p, d1))
+                    p.blocked += 1
+
+                moved = moveLegal(p, d2, board)    
+                if not moved:
+                    print("%s could not move %d" % (p, d1))
+                    p.blocked += 1
+
+
+                    
 
             if p.allPiecesAtHome():
                 p.rank = len(winners) + 1
@@ -132,9 +150,10 @@ def play(numPlayers, rolls=None):
 
             # turn is done
             turn += 1
+            p.turns += 1
 
             # everyone home?
-            gameDone = isGameDone(players, turn, rolls)
+            gameDone = isGameDone(players, rollIdx, rolls)
             if gameDone:
                 break
         
@@ -156,7 +175,8 @@ def play(numPlayers, rolls=None):
 
 def main():
     rolls = [(5,5)]
-    play(4, rolls=rolls)
+    # play(4, rolls=rolls)
+    play(4)
 
 
 

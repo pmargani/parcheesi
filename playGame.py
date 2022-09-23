@@ -299,6 +299,12 @@ def draw():
         row += 1
         screen.draw.text("Turns: %d" % p.turns, (x, yBase+(yStep*row)), fontsize=16)
 
+        row += 1
+        screen.draw.text("Doubles: %d" % p.doubles, (x, yBase+(yStep*row)), fontsize=16)
+
+        row += 1
+        screen.draw.text("Dbl Deaths: %d" % p.doubleDeaths, (x, yBase+(yStep*row)), fontsize=16)
+
         for pc in p.pieces:
             row += 1
             pos = (x, yBase+(yStep*row))
@@ -355,32 +361,45 @@ def update(time_interval):
     # players that are done don't get a turn
     if not p.allPiecesAtHome():
 
-        # roll!
-        if rolls is None:
-            d1, d2 = roll()
-        else:
-            d1, d2 = rolls[turn]
+        doubles = 0
+        rolling = True
+        while rolling: 
+            # roll!
+            if rolls is None:
+                d1, d2 = roll()
+            else:
+                d1, d2 = rolls[turn]
 
-        print(" Roll: ", d1, d2)
+            print(" Roll: ", d1, d2)
 
-        # move up to two pieces!
-        # first move
-        moved = moveLegal(p, d1, board)
-        if not moved:
-            print("%s could not move %d" % (p, d1))
-            p.blocked += 1
+            # check for doubles
+            if d1 != d2:
+                # no doubles, turn is over
+                rolling = False
+            else:
+                # keep track of how many
+                # doulbes we get, cause we die
+                # after 3
+                doubles += 1
+                p.doubles += 1
+                if doubles >= 3:
+                    print("Third doubles!", d1, d2)
+                    loseBestPiece(p, board)
+                    p.doubleDeaths += 1
+                    rolling = False
+                    break
 
+            # move up to two pieces!
+            # first move
+            moved = moveLegal(p, d1, board)
+            if not moved:
+                print("%s could not move %d" % (p, d1))
+                p.blocked += 1
 
-        #if d1 == 5:
-            # move a piece from base to start
-        #    p.movePieceToStart()
-        #if d2 == 5:
-            # move a piece from base to start
-        #    p.movePieceToStart()
-        moved = moveLegal(p, d2, board)    
-        if not moved:
-            print("%s could not move %d" % (p, d1))
-            p.blocked += 1
+            moved = moveLegal(p, d2, board)    
+            if not moved:
+                print("%s could not move %d" % (p, d1))
+                p.blocked += 1
 
     if p.allPiecesAtHome():
         if p.rank is None:

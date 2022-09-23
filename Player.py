@@ -19,6 +19,8 @@ class Player:
         self.rank = None
         self.blocked = 0
         self.turns = 0
+        self.doubles = 0
+        self.doubleDeaths = 0
         
     def __str__(self):
         return "Player %d (%s)" % (self.id, self.color)
@@ -42,6 +44,18 @@ class Player:
                 movePiece = p
                 break
         return movePiece        
+
+    def getBestPieceOnBoard(self):
+        "What piece is closest to home that isn't safely in home path?"
+        bestPiece = None
+        maxPos = None
+        for pc in self.pieces:
+            if pc.isOnMainBoard():
+                dist = pc.distanceFromStart()
+                if maxPos is None or maxPos < dist:
+                    maxPos = dist
+                    bestPiece = pc
+        return bestPiece              
 
     def hasPieceAtBase(self):
         for p in self.pieces:
