@@ -115,8 +115,9 @@ class TestPiece(unittest.TestCase):
         self.assertEqual(pc.advancePosition(12), 14)
         self.assertEqual(pc.advancePosition(5), 70)
         self.assertEqual(pc.advancePosition(2), 72)
-        self.assertEqual(pc.advancePosition(12), HOME)
-        self.assertEqual(pc.advancePosition(12), HOME)
+        # need exact step
+        self.assertEqual(pc.advancePosition(4), HOME)
+        # self.assertEqual(pc.advancePosition(12), HOME)
 
     def test_piecePlayer2(self):
         p = Player(2 , 'color')
@@ -142,7 +143,10 @@ class TestPiece(unittest.TestCase):
         self.assertEqual(pc.advancePosition(12), 31)
         self.assertEqual(pc.advancePosition(5), 70)
         self.assertEqual(pc.advancePosition(2), 72)
-        self.assertEqual(pc.advancePosition(12), HOME)
+        # can't move!
+        self.assertEqual(pc.advancePosition(6), 72)
+        # need exact roll
+        self.assertEqual(pc.advancePosition(4), HOME)
 
 
 
@@ -171,7 +175,7 @@ class TestPiece(unittest.TestCase):
         self.assertEqual(pc.advancePosition(12), 47)
         self.assertEqual(pc.advancePosition(5), 69)
         self.assertEqual(pc.advancePosition(2), 71)
-        self.assertEqual(pc.advancePosition(12), HOME)
+        self.assertEqual(pc.advancePosition(5), HOME)
 
 if __name__ == '__main__':
     unittest.main()

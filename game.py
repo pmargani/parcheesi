@@ -106,14 +106,42 @@ def isMoveLegal(piece, stepSize, board):
     for step in range(1, stepSize+1):
         stepPos = piece.getNextPosition(step)
 
+        if stepPos is None:
+            legal = False
+            break
+
         if numPiecesOnBoardPos(stepPos, piece, board) >= 2:
             legal = False
             break
 
     return legal
 
+def canGetPieceHome(player, die, board):
+    "Can this player get a piece home?"
+    can = False
+    pc = player.pieceCanGetHome(die)
+    if pc is not None:
+        can = isMoveLegal(pc, die, board)    
+    return can
+
+def getPieceHome(player, die, board):
+    "Assuming it's legal, move a piece to HOME"
+
+    pc = player.pieceCanGetHome(die)
+    oldPos = pc.position
+    pc.position = HOME
+    updateBoard(pc, oldPos, HOME, board)
+    return pc
+
 def moveLegal(player, die, board):
+    """
+    Make a legal move, using this strategy:
+       * if you can get piece to start, do that
+       * if you can get piece to home, do that
+       * otherwise, just advance the first piece you can
+    """   
     moved = False
+
     # first priority is to get a piece out of base
     if die == 5 and player.hasPieceAtBase() and startIsOpen(player, board):
         # move a piece from base to start
@@ -122,7 +150,13 @@ def moveLegal(player, die, board):
             board[pc.startPosition] = []
         board[pc.startPosition].append(pc) 
         moved = True  
-    else:
+        print("Moving piece %s to start" % pc)
+    elif canGetPieceHome(player, die, board):
+        pc = getPieceHome(player, die, board)
+        print("Moving piece %s to HOME" % pc)
+
+        moved = True
+    else:    
         # move any piece past start forward  
         for pc in player.pieces:
             if pc.isOnBoard():
@@ -130,6 +164,7 @@ def moveLegal(player, die, board):
                 newPos = pc.getNextPosition(die)
                 # newPos = pc.position
                 if isMoveLegal(pc, die, board):
+                    print("moving piece %s to %d" % (pc, newPos))
                     pc.position = newPos
                     updateBoard(pc, oldPos, newPos, board)
                     moved = True
@@ -140,8 +175,9 @@ def loseBestPiece(player, board):
 
     bestPiece = player.getBestPieceOnBoard()
     # send it back!
-    removeFromBoard(bestPiece, board)
-    bestPiece.position = BASE
+    if bestPiece is not None:
+        removeFromBoard(bestPiece, board)
+        bestPiece.position = BASE
 
 def printBoard(players):
     "Use ascii art to represent 1 base + 64 positions + 8 home path + 1 home for each piece"

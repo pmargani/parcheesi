@@ -138,7 +138,7 @@ def play(numPlayers, rolls=None):
 
                 moved = moveLegal(p, d2, board)    
                 if not moved:
-                    print("%s could not move %d" % (p, d1))
+                    print("%s could not move %d" % (p, d2))
                     p.blocked += 1
 
 

@@ -53,13 +53,16 @@ class TestMain(unittest.TestCase):
         s = START_ROLL
         sixes = (6, 4)
         rolls = [(s,6),(s,6)]
-        rolls.extend([sixes]*7)
+        rolls.extend([sixes]*5)
+        rolls.append((3,4))
+        rolls.append((2,4))
 
         players = play(1, rolls=rolls)
 
-        pos = [HOME, STARTOFFSET+10, BASE, BASE]
+        pos = [HOME, STARTOFFSET+4, BASE, BASE]
         p0 = players[0]
         for i in range(len(pos)):
+            print("Piece %s" % p0.pieces[i])
             self.assertEqual(pos[i], p0.pieces[i].position)
     
     def test_play5(self):

@@ -109,12 +109,24 @@ class Piece:
             # print("wrapping around ", nextPos)
             newPos = nextPos - BOARDLENGTH
 
+        elif nextPos > HOME:
+            # you can't overshoot!
+            # don't return None, instead, show how it didn't move
+            newPos = pos
         else:
             # print("simple advance")
             newPos = nextPos
             # once you get past home, you're home
-            if newPos > HOME:
-                newPos = HOME
+            # if newPos > HOME:
+                # newPos = HOME
         return newPos
 
- 
+    def canGetHome(self, step):
+        if self.position == HOME:
+            # already home
+            return False
+        nextPos = self.getNextPosition(step)
+        if nextPos is None:
+            return False
+        else:
+            return nextPos == HOME    

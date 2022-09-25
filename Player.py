@@ -57,6 +57,14 @@ class Player:
                     bestPiece = pc
         return bestPiece              
 
+    def pieceCanGetHome(self, die):
+        "Return first piece that can get home with this step"
+        p = None
+        for pc in self.pieces:
+            if pc.canGetHome(die):
+                p = pc
+        return p
+                
     def hasPieceAtBase(self):
         for p in self.pieces:
             if p.atBase():
