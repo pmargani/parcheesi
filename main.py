@@ -1,6 +1,9 @@
 import random
 from pprint import pprint
 
+import numpy as np
+import matplotlib.pylab as plt
+
 # one of four corners
 # start (safe) - 1
 # 2, 3, 4, 5
@@ -123,9 +126,11 @@ def play(numPlayers, rolls=None):
                     # doulbes we get, cause we die
                     # after 3
                     doubles += 1
+                    p.doubles += 1
                     if doubles >= 3:
                         print("Third doubles!", d1, d2)
                         loseBestPiece(p, board)
+                        p.doubleDeaths += 1
                         rolling = False
                         break
 
@@ -173,12 +178,106 @@ def play(numPlayers, rolls=None):
 
     return players
 
+def collectGameStats():
+    "Play the game, and return stats"
+
+    # play the game!
+    numPlayers = 4
+    players = play(numPlayers)
+
+    # collect all the stats from the players
+    winner = 0
+    totalTurns = totalBlocks = totalDoubles = totalDoubleDeaths = 0
+    totalDeaths = totalKills = 0
+
+    for p in players:
+        print("")
+        print("%s" % p)
+        print("  Finished: %d" % p.rank)
+        print("  num turns: %d" % p.turns)
+        print("  num kills: %d" % p.getKills())
+        print("  num deaths: %d" % p.getDeaths())
+        print("  num doubles: %d" % p.doubles)
+        print("  num deaths by doubles: %d" % p.doubleDeaths)
+        print("  was blocked %d times" % p.blocked)
+        totalTurns += p.turns
+        totalBlocks += p.blocked
+        totalDoubles += p.doubles
+        totalDoubleDeaths += p.doubleDeaths
+        totalKills += p.getKills()
+        totalDeaths += p.getDeaths()
+
+        if p.rank == 1:
+            winner = p
+
+    print("")
+    print("Total turns", totalTurns)
+    print("Total kills", totalKills)
+    print("Total deaths", totalDeaths)
+    print("Total blocks", totalBlocks)
+    print("Total doubles", totalDoubles)
+    print("Total deaths by doubles", totalDoubleDeaths)
+
+    gameTurns = winner.turns * numPlayers
+    print("Game won after %d turns" % gameTurns)
+
+    minPerTurn = .5
+
+    print("Game time for %f minutes per turn: %f" % (minPerTurn, minPerTurn*gameTurns))
+
+    stats = {
+        'winTurns': gameTurns,
+        'turns': totalTurns,
+        'kills': totalKills,
+        'deaths': totalDeaths,
+        'blocks': totalBlocks,
+        'doubles': totalDoubles,
+        'doubleDeaths': totalDoubleDeaths,
+    }
+
+    return stats, players
+
+
 def main():
-    rolls = [(5,5)]
+
+    #rolls = [(5,5)]
     # play(4, rolls=rolls)
-    play(4)
+    #play(4)
+    numGames = 100
+    allStats = {
+        'winTurns': [],
+        'turns': [],
+        'kills': [],
+        'deaths': [],
+        'blocks': [],
+        'doubles': [],
+        'doubleDeaths': [],
+    }
 
+    for i in range(numGames):
+        stats, players = collectGameStats()
+        for k, v in stats.items():
+            allStats[k].append(v)
 
+    
+    for k, v in allStats.items():
+        print("%s: mean=%f, std=%f" % (k, np.mean(v), np.std(v)))    
+        meanStr = "mean=%5.2f, std=%5.2f" % (np.mean(v), np.std(v))
+
+        num_bins = 20
+        n, bins, patches = plt.hist(v, num_bins, facecolor='blue', alpha=0.5)
+        
+        # put the stats on the plot?
+        #maxV = np.max(v)
+        #x = maxV - (maxV/10.)
+        #print("x:",x)
+        #plt.text(x, .8, meanStr, style='italic',
+        #bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 10})
+        plt.xlabel(k)
+        plt.ylabel("#")
+        plt.title("%s from %d games (%s)" % (k, numGames, meanStr))
+        plt.savefig("%s.png" % k)
+        plt.show()
 
 if __name__ == '__main__':
     main()
