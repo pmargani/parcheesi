@@ -16,6 +16,9 @@ class Piece:
         self.kills = 0
         self.deaths = 0
 
+        # pygame stuff
+        self.screenPosition = None
+
     def __str__(self):
         return "Piece %d (%d) at position %d" % (self.id, self.player.id, self.position)
 
@@ -81,14 +84,21 @@ class Piece:
 
 
     def getNextPosition(self, step):
-            
-        if self.position == BASE:
+        
+        # first, special cases of no motion possible    
+        if self.position == BASE and step != 5:
             print("In Base, can't advancePostion")
             return BASE
         if self.position >= HOME:
             print("Already Home, can't advancePosition")
             return HOME
 
+        # special case of getting out of base
+        if self.position == BASE and step == 5:
+            return self.startPosition
+        
+        # try the basic arithmatic, then check for 
+        # wrap around and going up home path
         pos = self.position
         nextPos = self.position + step
         newPos = None
@@ -101,6 +111,7 @@ class Piece:
                 newPos = nextPos
             return newPos
                     
+
         if pos <= self.homePathStartPosition and nextPos > self.homePathStartPosition:
             # print("move into home path")
             diff = self.homePathStartPosition - pos
@@ -110,7 +121,7 @@ class Piece:
             newPos = nextPos - BOARDLENGTH
 
         elif nextPos > HOME:
-            # you can't overshoot!
+            # you can't overshoot past home!
             # don't return None, instead, show how it didn't move
             newPos = pos
         else:
@@ -130,3 +141,5 @@ class Piece:
             return False
         else:
             return nextPos == HOME    
+
+            
