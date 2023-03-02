@@ -76,3 +76,39 @@ Obviously there is no regard for offensive or defensive moves yet.
 
 Currently the only thing we can do is play a full game with randomized dice rolls and the above mentioned strategy.  But we can collect metrics such as how many turns the game takes, how many times each player is blocked or sent back to the nest, etc.
 
+Here are some results from running the game 10,000 times using the one above mentioned, simple strategy:
+
+<img src="images/winTurns.png" alt="winTurns.png" width="500">
+
+Above we have the number of turns (for all players) before the first player wins.  We can see that the mean number of turns before the game has a winner (recall that players can decide to keep playing to see who gets second, etc) is 244.  
+
+If each turn takes 15 seconds (this would be an extermely efficient game), then 244 turns would take about an hour.  This is *much* faster then the games I have experience playing, that can take up to *three* hours.  This may simply be a direct consequence of sending other players back to home, and blocking them.  We'll see about this once we start running the game with different strategies.
+
+<img src="images/turns.png" alt="turns.png" width="500">
+
+Above we see how many turns it takes to get *all* the players' pieces into home.  Obviously this takes a little longer then just for the first player to get all their pieces home.
+
+<img src="images/blocks.png" alt="blocks.png" width="500">
+
+Above we see how many times a player cannot move a piece.  Note that this could be any number of factors:  all pieces are in the nest and a 5 was not rolled, or all pieces out of the nest are behind another player's blockade.  It would be interesting to track these different circumstances separately.
+
+<img src="images/deaths.png" alt="deaths.png" width="500">
+<img src="images/kills.png" alt="kills.png" width="500">
+
+Above we see how many times in a given game a piece is sent back to home ('death') or a piece sends another piece home ('kill').  The fact that these plots are identical is a very good sanity check.  I am surprised at how many times pieces are sent back when using a strategy that is not trying to do this: it's simply statistics.
+
+<img src="images/doubles.png" alt="doubles.png" width="500">
+
+Speaking of statistics, above shows the number of times doubles were rolled.  It would be good to check that this makes statistical sense, since the rolling of the dice isn't affected by anything going on on the board.
+
+<img src="images/doubleDeaths.png" alt="doubleDeaths.png" width="500">
+
+In the above plot we have more results that can be confirmed statiscally: what are the odds of rolling three doubles in a row when the dice are rolled for about 244 turns?
+
+What's interesting is that the mean is 1.36.  So it's not unreasonable that this type of thing should happen once or twice per game.  But why does it always happen to me?
+
+
+
+
+
+
