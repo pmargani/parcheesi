@@ -14,6 +14,8 @@ Parcheesi is a brand-name American adaptation of the Indian cross and circle boa
 
 https://en.wikipedia.org/wiki/Parcheesi
 
+<img src="images/Parcheesi-board.jpg" alt="Parcheesi-board.jpg" width="500">
+
 Parcheesi is typically played with two dice, four pieces per player and a gameboard with a track around the outside, four corner spaces and four home paths leading to a central end space. The most popular Parcheesi boards in America have 68 spaces around the edge of the board, 12 of which are darkened safe spaces. Each corner of the board contains one player's nest, or starting area. 
 
 ### Setup
