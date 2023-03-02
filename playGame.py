@@ -1,6 +1,7 @@
 import time
 import sys
 import random
+import math
 
 import pygame
 
@@ -70,9 +71,39 @@ for i in range(NUMPLAYERS):
     print(p.getDescription())
     players.append(p)
 
+mousePos = (0, 0)
+mouseDownPos = (0, 0)
+selectedPiece = None
+selectedPos = None
+legalPos1 = None
+legalPos2 = None
+legalBoardPos1 = None
+legalBoardPos2 = None
+nextDie = None
+
+# game state, for each player,
+# go through their state:
+# player must roll
+# for each die:
+# player must select a piece
+# player must select position for piece
+SELECT_PIECE1 = "Select Piece 1"
+SELECT_POS1 = "Select Position 1"
+SELECT_PIECE2 = "Select Piece 2"
+SELECT_POS2 = "Select Position 2"
+
+ROLL = "Roll"
+
+playerStates = [ROLL, SELECT_PIECE1, SELECT_POS1, SELECT_PIECE2, SELECT_POS2]
+playerState = 0
+numStates = len(playerStates)
+
+
 
 def getBoardPositions():
-    
+    """
+    Returns lists of screen positions where index is a board position
+    """    
 
 
     # y = WIDTH/2
@@ -241,9 +272,15 @@ def makePiecePositionOffset(i, pos, screenPos, playerId):
             yOff = i*offset
 
     return x + xOff, y + yOff
+          
             
-def drawPiece(player, piece, board):
-    screen_pos = getScreenPosition(piece.position, piece.id, player.id)
+def drawPiece(player, piece, board, screen_pos=None, txtColor=None):
+    """
+    Draw a player's piece on the screen, taking into account
+    other pieces in that pieces same board position.
+    """
+    if screen_pos is None:
+        screen_pos = getScreenPosition(piece.position, piece.id, player.id)
 
     if piece.position != BASE and piece.position < HOME:
         # how many other pieces on this position?
@@ -253,13 +290,57 @@ def drawPiece(player, piece, board):
 
         screen_pos = makePiecePositionOffset(i, piece.position, screen_pos, player.id)
     
+    piece.screenPosition = screen_pos
+
+    # print("screen.draw.filled_circle: ", screen_pos)
     screen.draw.filled_circle(screen_pos, PIECE_RADIUS, SCREEN_COLORS[player.color])
     tx, ty = screen_pos
     offset = 4
-    screen.draw.text(str(piece.id), (tx-offset, ty-offset), color='grey')
+    if txtColor is None:
+        txtColor = 'grey'
+    screen.draw.text(str(piece.id), (tx-offset, ty-offset), color=txtColor)
+
+def screenDistance(p1, p2):
+    x1, y1 = p1
+    x2, y2 = p2
+    return math.sqrt((x1-x2)**2 + (y1-y2)**2)
 
 def on_mouse_down(pos, button):
+    global mouseDownPos, selectedPiece, selectedPos
     print("Mouse button", button, "clicked at", pos)
+    print("player state: ", playerStates[playerState])
+    mouseDownPos = pos
+
+    # selectedPiece = None
+    # selectedPos = None
+
+    if playerStates[playerState] in [SELECT_PIECE1, SELECT_PIECE2]:
+        #for p in players:
+        p = players[playerTurn]
+        if True:
+            for pc in p.pieces:
+                pcPos = pc.screenPosition
+                dist = None
+                if pcPos is not None:
+                    dist = screenDistance(pcPos, pos)
+                print("dist from piece %s piece %s" % (pc, dist))
+                if pcPos is not None and screenDistance(pcPos, pos) < PIECE_RADIUS:
+                    selectedPiece = pc
+                    print("selectedPiece: %s" % pc)
+
+    if playerStates[playerState] in [SELECT_POS1, SELECT_POS2]:
+        # the player needs to select a position.  
+        # is the mouse close enough to a legal position?
+        if legalPos1 is not None and screenDistance(legalPos1, pos) < PIECE_RADIUS:
+            selectedPos = legalBoardPos1
+            print("selectedPos legalPos1: ", selectedPos)
+        elif legalPos2 is not None and screenDistance(legalPos2, pos) < PIECE_RADIUS:
+            selectedPos = legalBoardPos2    
+            print("selectedPos legalPos2: ", selectedPos)
+
+def on_mouse_move(pos):  #[pos][, rel][, buttons])
+    global mousePos
+    mousePos = pos
 
 def draw():
     global players, board, d1, d2
@@ -272,7 +353,54 @@ def draw():
     row = 0
     yBase = HEIGHT - STATUS_HEIGHT 
     yStep = 20
+    screen.draw.text("Roll: %s %s" % (d1, d2), (0, yBase))
+
+    mx, my = mousePos
+    screen.draw.text("Mouse: %d %d" % (mx, my), (WIDTH/4, yBase))
+
+    screen.draw.text("Sel: %s" % selectedPiece, (WIDTH/2, yBase))
+
+    row = 1
+    yPos = yBase + (row*yStep)
+    screen.draw.text("State: %s" % playerStates[playerState], (0, yPos))
+
+    for i, p in enumerate(players):
+
+        for pc in p.pieces:
+            drawPiece(p, pc, board)
+
+        x = (WIDTH/4) * p.id
+        row = 2
+        pos = (x, yBase + (row*yStep))
+        c = COLOR_BLUE if i == playerTurn else COLOR_YELLOW
+        screen.draw.text("Player %d (%s)" % (p.id, p.color), pos, color=c)
+
+    if legalPos1 is not None and selectedPiece is not None:
+        # print("drawing 1: ", legalPos1)
+        drawPiece(players[playerTurn], selectedPiece, board, screen_pos=legalPos1, txtColor='black')
+
+    if legalPos2 is not None and selectedPiece is not None:
+        # print("drawing 2: ", legalPos2)
+        drawPiece(players[playerTurn], selectedPiece, board, screen_pos=legalPos2, txtColor='black')
+        
+
+def drawDetails():
+    global players, board, d1, d2
+
+    # screen.blit("background", (0,0))
+    screen.fill((128,0,0))
+
+    screen.blit("parcheesi_board2", (0,0))
+
+    row = 0
+    yBase = HEIGHT - STATUS_HEIGHT 
+    yStep = 20
     screen.draw.text("Roll: %d %d" % (d1, d2), (0, yBase))
+
+    mx, my = mousePos
+    screen.draw.text("Mouse: %d %d" % (mx, my), (WIDTH/4, yBase))
+
+    screen.draw.text("Sel: %s" % selectedPiece, (WIDTH/2, yBase))
 
     for p in players:
 
@@ -282,7 +410,7 @@ def draw():
         x = (WIDTH/4) * p.id
         row = 1
         pos = (x, yBase + (row*yStep))
-        screen.draw.text("Player %d" % p.id, pos)
+        screen.draw.text("Player %d (%s)" % (p.id, p.color), pos)
 
         row += 1
         screen.draw.text("Rank: %s" % p.rank, (x, yBase+(yStep*row)), fontsize=16)
@@ -337,8 +465,106 @@ def draw():
     # screen.draw.line(pos, e, color='black')
 
 
-    
 def update(time_interval):
+    # global bullets, tanks, rubble
+    global turn, playerTurn, players, winners, d1, d2, board, playerState, legalPos1, legalPos2
+    global legalBoardPos1, legalBoardPos2, selectedPiece, nextDie
+
+    now = time.time()
+
+    if keyboard.escape:
+        sys.exit()
+
+    # what's the roll?
+    # d1, d2 = roll()
+
+    p = players[playerTurn]
+
+    # if this player can't move, just 
+    # go to next turn
+    # if not hasLegalMove(p, d1, d2, board):
+        # playerTurn = nextTurn(playerTurn, NUMPLAYERS)
+        # return
+
+    # pl
+
+    stateName = playerStates[playerState]    
+    # print('player state: ', stateName)
+
+    if stateName == ROLL:
+        d1, d2 = (5, 4) #roll()
+        # next select piece
+        playerState += 1
+
+    elif stateName == SELECT_PIECE1 and selectedPiece is not None:
+        if isMoveLegal(selectedPiece, d1, board):
+            print("move is legal!")
+            legalBoardPos1 = selectedPiece.getNextPosition(d1)
+            legalPos1 = boardScreenPositions[legalBoardPos1]
+            print("legalPos1: ", legalPos1)
+        if isMoveLegal(selectedPiece, d2, board):
+            legalBoardPos2 = selectedPiece.getNextPosition(d2)
+            legalPos2 = boardScreenPositions[legalBoardPos2]
+
+        # next select location
+        playerState += 1    
+
+    elif stateName == SELECT_POS1 and selectedPos is not None:
+        # TBF: check for legal position, then move piece
+        print("user selectedPos: ", selectedPos)
+        updateBoard(selectedPiece, selectedPiece.position, selectedPos, board)  
+        selectedPiece.position = selectedPos
+
+        # what's going to be  the next die move to try?
+        nextDie = d1 if selectedPos == legalPos2 else d2
+
+        # reset
+        legalPos1 = legalPos2 = None
+        selectedPiece = None
+
+        # next, go to next state
+        
+        # first time around this should go back to selecting a piece
+        playerState += 1        
+
+    elif stateName == SELECT_PIECE2 and selectedPiece is not None:
+        if isMoveLegal(selectedPiece, nextDie, board):
+            print("move is legal!")
+            legalBoardPos1 = selectedPiece.getNextPosition(d1)
+            legalPos1 = boardScreenPositions[legalBoardPos1]
+            print("legalPos1: ", legalPos1)
+        # if isMoveLegal(selectedPiece, d2, board):
+        #     legalBoardPos2 = selectedPiece.getNextPosition(d2)
+        #     legalPos2 = boardScreenPositions[legalBoardPos2]
+
+        # next select location
+        playerState += 1 
+
+    elif stateName == SELECT_POS2 and selectedPos is not None:
+        # TBF: check for legal position, then move piece
+        print("user selectedPos: ", selectedPos)
+        updateBoard(selectedPiece, selectedPiece.position, selectedPos, board)  
+        selectedPiece.position = selectedPos
+
+        # what's going to be  the next die move to try?
+        nextDie = d1 if selectedPos == legalPos2 else d2
+
+        # reset
+        legalPos1 = legalPos2 = None
+        selectedPiece = None
+
+        # next, go to next state
+        
+        # first time around this should go back to selecting a piece
+        playerState += 1  
+        if playerState >= numStates:
+            print("moving to next player turn")
+            playerState = 0
+            playerTurn += 1
+            if playerTurn >= NUMPLAYERS:
+                playerTurn = 0
+
+def updateAutonomous(time_interval):
     # global bullets, tanks, rubble
     global turn, playerTurn, players, winners, d1, d2
 
