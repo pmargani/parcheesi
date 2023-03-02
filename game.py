@@ -11,6 +11,21 @@ def allPlayersDone(players):
             return False
     return True
 
+def hasLegalMove(player, d1, d2, board):
+
+    for pc in player.pieces:
+        if isMoveLegal(pc, d1, board):
+            return True
+        if isMoveLegal(pc, d2, board):
+            return True
+    return False
+            
+def nextTurn(turn, numPlayers):
+    turn += 1
+    if turn >= numPlayers:
+        turn = 0
+    return turn
+        
 def roll():
     d1 = random.randint(1,6)
     d2 = random.randint(1,6)
@@ -102,6 +117,15 @@ def numPiecesOnBoardPos(pos, piece, board):
 def isMoveLegal(piece, stepSize, board):
 
     legal = True
+
+    # special starting case
+    if piece.atBase():
+        if stepSize == START_ROLL:
+            return numPiecesOnBoardPos(piece.startPosition, piece, board) < 2
+        else:
+            # only a certain roll gets you out of base
+            return False
+
     # pos = piece.position
     for step in range(1, stepSize+1):
         stepPos = piece.getNextPosition(step)
