@@ -177,5 +177,15 @@ class TestPiece(unittest.TestCase):
         self.assertEqual(pc.advancePosition(2), 71)
         self.assertEqual(pc.advancePosition(5), HOME)
 
+
+    def test_pieceStart(self):
+
+        p = Player(3, 'color')
+        pc = Piece(0, p)
+
+        self.assertEqual(0, pc.id)
+
+        self.assertEqual(pc.startPosition, pc.getNextPosition(START_ROLL))
+
 if __name__ == '__main__':
     unittest.main()
