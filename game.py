@@ -140,6 +140,10 @@ def isMoveLegal(piece, stepSize, board):
 
     return legal
 
+def canMovePieceOutOfBase(player, die, board):
+    "Are conditions right that a player can move a piece out of base/nest"
+    return die == 5 and player.hasPieceAtBase() and startIsOpen(player, board)
+
 def canGetPieceHome(player, die, board):
     "Can this player get a piece home?"
     can = False
@@ -157,6 +161,83 @@ def getPieceHome(player, die, board):
     updateBoard(pc, oldPos, HOME, board)
     return pc
 
+def movePieceToStart(player, board):
+    "move a piece from base to start"
+    pc = player.movePieceToStart()
+    if pc.startPosition not in board:
+        board[pc.startPosition] = []
+    board[pc.startPosition].append(pc) 
+    return pc
+
+def movePiece(player, die, board, strategy=None):
+    "Interface for moving a players piece according to the die and what is legal on the board"
+    if strategy is None:
+        return moveLegal(player, die, board)
+    
+    move = True
+    options = getMoveOptions(player, die, board)
+    if len(options) == 0:
+        # this player has no options to move
+        move = False
+    elif len(options) == 1:
+        # only one option!  have to do it!
+        moveLegal(player, die, board)
+
+    else:
+        moveViaStrategy(player, die, board, options, strategy)
+    return move
+        
+def moveViaStrategy(player, die, board, options, strategy):
+    """
+    Pick the move that aligns with our given strategy
+    """
+
+    # a strategy lists the priorities for certain options.
+    # if an option is not listed, then it's a last resort
+    # and all last resorts have equal low priority
+
+
+    opt = pickOption(options, strategy)
+    if opt is None:
+        # we just going to make a legal move
+        piece = moveLegal(player, die, board)
+    else:
+        # make the move according to the strategy
+        moveOpt, piece = opt
+        if moveOpt == START_PIECE:
+            piece = movePieceToStart(player, board)
+        elif moveOpt == GET_HOME:
+            piece = getPieceHome(player, die, board)
+        else:
+            # all other moves are covered here
+            oldPos = piece.position
+            newPos = piece.getNextPosition(die)
+            piece.position = newPos
+            updateBoard(piece, oldPos, newPos, board)
+
+    return piece        
+
+def pickOption(options, strategy):
+    """
+    Simply pick the option that gets the highest score from the strategy
+       * options: [(str, Piece)]
+       * strategy: {str: int}
+    """
+    maxOpt = None
+    for optStr, piece in options:
+        if optStr not in strategy:
+            continue
+        optScore = strategy[optStr]
+        if maxOpt is None: # or optScore > maxOpt[0]:
+            maxOpt = (optStr, piece)
+        else:
+            maxStrategy, maxPiece = maxOpt
+            maxScore = strategy[maxStrategy]
+            if optScore > maxScore:
+                maxOpt = (optStr, piece)    
+    return maxOpt
+            
+
 def moveLegal(player, die, board):
     """
     Make a legal move, using this strategy:
@@ -167,12 +248,14 @@ def moveLegal(player, die, board):
     moved = False
 
     # first priority is to get a piece out of base
-    if die == 5 and player.hasPieceAtBase() and startIsOpen(player, board):
-        # move a piece from base to start
-        pc = player.movePieceToStart()
-        if pc.startPosition not in board:
-            board[pc.startPosition] = []
-        board[pc.startPosition].append(pc) 
+    #if die == 5 and player.hasPieceAtBase() and startIsOpen(player, board):
+    if canMovePieceOutOfBase(player, die, board):
+        # # move a piece from base to start
+        # pc = player.movePieceToStart()
+        # if pc.startPosition not in board:
+        #     board[pc.startPosition] = []
+        # board[pc.startPosition].append(pc) 
+        pc = movePieceToStart(player, board)
         moved = True  
         print("Moving piece %s to start" % pc)
     elif canGetPieceHome(player, die, board):
@@ -195,6 +278,67 @@ def moveLegal(player, die, board):
                     break 
     return moved
 
+def getMoveOptions(player, die, board):
+
+    options = []
+    if canMovePieceOutOfBase(player, die, board):
+        options.append(('START_PIECE', None))
+    if canGetPieceHome(player, die, board):
+        pc = player.pieceCanGetHome(die)
+        options.append(('GET_HOME', pc))
+    for pc in player.pieces:
+        if pc.isOnBoard():
+            oldPos = pc.position
+            newPos = pc.getNextPosition(die)    
+            if isMoveLegal(pc, die, board): 
+                # OK, we can move this piece, but what kind of move is it?
+                if newPos in SAFE_POSITIONS:
+                    options.append(('GET_SAFE', pc))
+                # TBF: we need to take into account getting into the home stretch as well    
+                #elif isNewPositionSafe(): 
+                #    options.append(('GET_SAFE', pc))    
+                elif isOccupiedByOtherPlayer(newPos, board, player):
+                    options.append(('MAKE_KILL', pc))
+                elif isOccupiedByPlayer(newPos, board, player):
+                    options.append(('MAKE_BLOCKADE', pc))
+                else:
+                    # the piece can simply move forward, other details not known
+                    options.append(('MOVE_FORWARD', pc))        
+
+    return options
+
+def isOccupiedByPlayer(newPos, board, player):
+    """
+    This function ignores the number of pieces actuall at the newPos.
+    If one of the pieces belongs to this player it will return True
+    """
+    result = False
+    if newPos not in board:
+        # no piece is on this position of the board
+        return result
+    pcs = board[newPos]
+    for pc in pcs:
+        if pc.player == player:
+            result = True
+            break
+    return result
+
+def isOccupiedByOtherPlayer(newPos, board, player):
+    """
+    This function ignores the number of pieces actually at the newPos.
+    If one of the pieces belongs to other player it will return True
+    """
+    result = False
+    if newPos not in board:
+        # no piece is on this position of the board
+        return result
+    pcs = board[newPos]
+    for pc in pcs:
+        if pc.player != player:
+            result = True
+            break
+    return result
+            
 def loseBestPiece(player, board):
 
     bestPiece = player.getBestPieceOnBoard()

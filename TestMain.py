@@ -19,6 +19,26 @@ class TestMain(unittest.TestCase):
         for i in range(len(pos)):
             self.assertEqual(pos[i], p0.pieces[i].position)
 
+    def test_play1strategy1(self):
+        "One player gets two pieces out with doubles"
+
+        # using this simple strategy should give same result as
+        # default 'strategy'
+        strategy = {
+            START_PIECE: 2,
+            GET_HOME: 1
+        }
+        s = START_ROLL
+        rolls = [(s,s),(1,2)]
+
+        players = play(1, strategy=strategy, rolls=rolls)
+
+        # first 2 pieces will be on start, others at base
+        pos = [STARTOFFSET+3, STARTOFFSET, BASE, BASE]
+        p0 = players[0]
+        for i in range(len(pos)):
+            self.assertEqual(pos[i], p0.pieces[i].position)
+
     def test_play2(self):
         "One player advances one piece"
 
@@ -87,6 +107,46 @@ class TestMain(unittest.TestCase):
 
     def test_play6(self):
         "1 player blocks itself"
+
+        s = START_ROLL
+        rolls = [(s,6),(s,6),(s,6),(s,6)]
+
+        players = play(1, rolls=rolls)
+
+        pos = [STARTOFFSET + 6*4 + 5, STARTOFFSET, STARTOFFSET, BASE]
+        p0 = players[0]
+        for i in range(len(pos)):
+            self.assertEqual(pos[i], p0.pieces[i].position)
+
+    def test_play6strategy1(self):
+        "1 player blocks itself"
+
+        # using this simple strategy should give same result as
+        # default 'strategy'
+        strategy = {
+            START_PIECE: 2,
+            GET_HOME: 1
+        }
+
+        s = START_ROLL
+        rolls = [(s,6),(s,6),(s,6),(s,6)]
+
+        players = play(1, rolls=rolls)
+
+        pos = [STARTOFFSET + 6*4 + 5, STARTOFFSET, STARTOFFSET, BASE]
+        p0 = players[0]
+        for i in range(len(pos)):
+            self.assertEqual(pos[i], p0.pieces[i].position)
+
+    def test_play6strategy2(self):
+        "1 player blocks itself"
+
+        # using this simple strategy should give same result as
+        # default 'strategy'
+        strategy = {
+            MOVE_FORWARD: 2,
+            GET_HOME: 1
+        }
 
         s = START_ROLL
         rolls = [(s,6),(s,6),(s,6),(s,6)]

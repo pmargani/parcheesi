@@ -67,7 +67,7 @@ from Piece import Piece
 
                     
 
-def play(numPlayers, rolls=None):
+def play(numPlayers, strategy=None, rolls=None):
     
     board = {}
 
@@ -136,12 +136,12 @@ def play(numPlayers, rolls=None):
 
                 # move up to two pieces!
                 # first move
-                moved = moveLegal(p, d1, board)
+                moved = movePiece(p, d1, board, strategy)
                 if not moved:
                     print("%s could not move %d" % (p, d1))
                     p.blocked += 1
 
-                moved = moveLegal(p, d2, board)    
+                moved = movePiece(p, d2, board, strategy)    
                 if not moved:
                     print("%s could not move %d" % (p, d2))
                     p.blocked += 1
@@ -178,12 +178,12 @@ def play(numPlayers, rolls=None):
 
     return players
 
-def collectGameStats():
+def collectGameStats(strategy):
     "Play the game, and return stats"
 
     # play the game!
     numPlayers = 4
-    players = play(numPlayers)
+    players = play(numPlayers, strategy)
 
     # collect all the stats from the players
     winner = 0
@@ -244,6 +244,14 @@ def main():
     # play(4, rolls=rolls)
     #play(4)
     numGames = 100
+
+
+    # strategy = {
+    #     MAKE_KILL : 2,
+    #     GET_HOME : 1,
+    # }
+    strategy = None
+
     allStats = {
         'winTurns': [],
         'turns': [],
@@ -255,7 +263,7 @@ def main():
     }
 
     for i in range(numGames):
-        stats, players = collectGameStats()
+        stats, players = collectGameStats(strategy)
         for k, v in stats.items():
             allStats[k].append(v)
 
