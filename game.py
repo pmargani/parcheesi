@@ -37,29 +37,29 @@ def isGameDone(players, rollIdx, rolls):
             return True
     return allPlayersDone(players)
 
-def updateBoard(piece, oldPos, newPos, board):
+# def updateBoard(piece, oldPos, newPos, board):
 
-    if oldPos in board:
-        # find piece and remove it
-        for i, pc in enumerate(board[oldPos]):
-            if pc == piece:
-                board[oldPos].pop(i)
-    if newPos not in board:
-        board[newPos] = []
-    elif len(board[newPos]) > 0 and newPos < BOARDLENGTH and newPos not in SAFE_POSITIONS:
-        # there's other pieces here?  Any from other team?
-        # TBF: arbitrarly pick first one
-        otherPiece = board[newPos][0]
-        if otherPiece.player.id != piece.player.id:
-            # back to base!
-            print("Kill by %s on %s" % (piece, otherPiece))
-            otherPiece.deaths += 1
-            otherPiece.position = BASE
-            board[newPos].pop(0)
-            piece.kills += 1
+#     if oldPos in board:
+#         # find piece and remove it
+#         for i, pc in enumerate(board[oldPos]):
+#             if pc == piece:
+#                 board[oldPos].pop(i)
+#     if newPos not in board:
+#         board[newPos] = []
+#     elif len(board[newPos]) > 0 and newPos < BOARDLENGTH and newPos not in SAFE_POSITIONS:
+#         # there's other pieces here?  Any from other team?
+#         # TBF: arbitrarly pick first one
+#         otherPiece = board[newPos][0]
+#         if otherPiece.player.id != piece.player.id:
+#             # back to base!
+#             print("Kill by %s on %s" % (piece, otherPiece))
+#             otherPiece.deaths += 1
+#             otherPiece.position = BASE
+#             board[newPos].pop(0)
+#             piece.kills += 1
 
 
-    board[newPos].append(piece)
+#     board[newPos].append(piece)
 
     # remove other piece first
                                 
@@ -77,42 +77,43 @@ def moveSimple(player, die, board):
             oldPos = pc.position
             pc.advancePosition(die)
             newPos = pc.position
-            updateBoard(pc, oldPos, newPos, board)
+            # updateBoard(pc, oldPos, newPos, board)
+            board.update(pc, oldPos, newPos)
             break   
 
-def startIsOpen(player, board):
+# def startIsOpen(player, board):
 
-    pos = player.startPosition
+#     pos = player.startPosition
 
-    if pos not in board:
-        # it's empty!
-        return True
-    elif len(board[pos]) < 2:
-        # just one piece there!
-        return True
-    else:
-        # it's full!
-        return False
+#     if pos not in board:
+#         # it's empty!
+#         return True
+#     elif len(board[pos]) < 2:
+#         # just one piece there!
+#         return True
+#     else:
+#         # it's full!
+#         return False
 
-def removeFromBoard(piece, board):
+# def removeFromBoard(piece, board):
 
-    pcs = board[piece.position]
-    for i, pc in enumerate(pcs):
-        if pc == piece:
-            pcs.pop(i)
-            break
+#     pcs = board[piece.position]
+#     for i, pc in enumerate(pcs):
+#         if pc == piece:
+#             pcs.pop(i)
+#             break
 
-def numPiecesOnBoardPos(pos, piece, board):
-    if pos not in board:
-        return 0
-    if pos <= BOARDLENGTH:    
-        return len(board[pos])
-    elif pos >= HOME:
-        # act like nobodies there, since there aren't restrictions
-        return 0    
-    else:
-        # treat the home path as four separate paths
-        return len([ pc for pc in board[pos] if pc.player.id == piece.player.id])    
+# def numPiecesOnBoardPos(pos, piece, board):
+#     if pos not in board:
+#         return 0
+#     if pos <= BOARDLENGTH:    
+#         return len(board[pos])
+#     elif pos >= HOME:
+#         # act like nobodies there, since there aren't restrictions
+#         return 0    
+#     else:
+#         # treat the home path as four separate paths
+#         return len([ pc for pc in board[pos] if pc.player.id == piece.player.id])    
         
 def isMoveLegal(piece, stepSize, board):
 
@@ -121,7 +122,7 @@ def isMoveLegal(piece, stepSize, board):
     # special starting case
     if piece.atBase():
         if stepSize == START_ROLL:
-            return numPiecesOnBoardPos(piece.startPosition, piece, board) < 2
+            return board.numPiecesOnBoardPos(piece.startPosition, piece) < 2
         else:
             # only a certain roll gets you out of base
             return False
@@ -134,7 +135,7 @@ def isMoveLegal(piece, stepSize, board):
             legal = False
             break
 
-        if numPiecesOnBoardPos(stepPos, piece, board) >= 2:
+        if board.numPiecesOnBoardPos(stepPos, piece) >= 2:
             legal = False
             break
 
@@ -142,7 +143,7 @@ def isMoveLegal(piece, stepSize, board):
 
 def canMovePieceOutOfBase(player, die, board):
     "Are conditions right that a player can move a piece out of base/nest"
-    return die == 5 and player.hasPieceAtBase() and startIsOpen(player, board)
+    return die == 5 and player.hasPieceAtBase() and board.isStartOpen(player)
 
 def canGetPieceHome(player, die, board):
     "Can this player get a piece home?"
@@ -158,15 +159,17 @@ def getPieceHome(player, die, board):
     pc = player.pieceCanGetHome(die)
     oldPos = pc.position
     pc.position = HOME
-    updateBoard(pc, oldPos, HOME, board)
+    # updateBoard(pc, oldPos, HOME, board)
+    board.update(pc, oldPos, HOME)
     return pc
 
 def movePieceToStart(player, board):
     "move a piece from base to start"
     pc = player.movePieceToStart()
-    if pc.startPosition not in board:
-        board[pc.startPosition] = []
-    board[pc.startPosition].append(pc) 
+    # if pc.startPosition not in board:
+    #     board[pc.startPosition] = []
+    # board[pc.startPosition].append(pc) 
+    board.movePieceToStart(pc)
     return pc
 
 def movePiece(player, die, board, strategy=None):
@@ -213,7 +216,8 @@ def moveViaStrategy(player, die, board, options, strategy):
             oldPos = piece.position
             newPos = piece.getNextPosition(die)
             piece.position = newPos
-            updateBoard(piece, oldPos, newPos, board)
+            # updateBoard(piece, oldPos, newPos, board)
+            board.update(piece, oldPos, newPos)
 
     return piece        
 
@@ -273,7 +277,8 @@ def moveLegal(player, die, board):
                 if isMoveLegal(pc, die, board):
                     print("moving piece %s to %d" % (pc, newPos))
                     pc.position = newPos
-                    updateBoard(pc, oldPos, newPos, board)
+                    # updateBoard(pc, oldPos, newPos, board)
+                    board.update(pc, oldPos, newPos)
                     moved = True
                     break 
     return moved
@@ -297,9 +302,9 @@ def getMoveOptions(player, die, board):
                 # TBF: we need to take into account getting into the home stretch as well    
                 #elif isNewPositionSafe(): 
                 #    options.append(('GET_SAFE', pc))    
-                elif isOccupiedByOtherPlayer(newPos, board, player):
+                elif board.isOccupiedByOtherPlayer(newPos, player):
                     options.append(('MAKE_KILL', pc))
-                elif isOccupiedByPlayer(newPos, board, player):
+                elif board.isOccupiedByPlayer(newPos, player):
                     options.append(('MAKE_BLOCKADE', pc))
                 else:
                     # the piece can simply move forward, other details not known
@@ -307,44 +312,45 @@ def getMoveOptions(player, die, board):
 
     return options
 
-def isOccupiedByPlayer(newPos, board, player):
-    """
-    This function ignores the number of pieces actuall at the newPos.
-    If one of the pieces belongs to this player it will return True
-    """
-    result = False
-    if newPos not in board:
-        # no piece is on this position of the board
-        return result
-    pcs = board[newPos]
-    for pc in pcs:
-        if pc.player == player:
-            result = True
-            break
-    return result
+# def isOccupiedByPlayer(newPos, board, player):
+#     """
+#     This function ignores the number of pieces actuall at the newPos.
+#     If one of the pieces belongs to this player it will return True
+#     """
+#     result = False
+#     if newPos not in board:
+#         # no piece is on this position of the board
+#         return result
+#     pcs = board[newPos]
+#     for pc in pcs:
+#         if pc.player == player:
+#             result = True
+#             break
+#     return result
 
-def isOccupiedByOtherPlayer(newPos, board, player):
-    """
-    This function ignores the number of pieces actually at the newPos.
-    If one of the pieces belongs to other player it will return True
-    """
-    result = False
-    if newPos not in board:
-        # no piece is on this position of the board
-        return result
-    pcs = board[newPos]
-    for pc in pcs:
-        if pc.player != player:
-            result = True
-            break
-    return result
+# def isOccupiedByOtherPlayer(newPos, board, player):
+#     """
+#     This function ignores the number of pieces actually at the newPos.
+#     If one of the pieces belongs to other player it will return True
+#     """
+#     result = False
+#     if newPos not in board:
+#         # no piece is on this position of the board
+#         return result
+#     pcs = board[newPos]
+#     for pc in pcs:
+#         if pc.player != player:
+#             result = True
+#             break
+#     return result
             
 def loseBestPiece(player, board):
 
     bestPiece = player.getBestPieceOnBoard()
     # send it back!
     if bestPiece is not None:
-        removeFromBoard(bestPiece, board)
+        # removeFromBoard(bestPiece, board)
+        board.removeFromBoard(bestPiece)
         bestPiece.position = BASE
 
 def printBoard(players):

@@ -53,6 +53,7 @@ from Constants import *
 from game import *
 from Player import Player
 from Piece import Piece
+from Board import Board
 
 
 
@@ -69,7 +70,7 @@ from Piece import Piece
 
 def play(numPlayers, strategy=None, rolls=None):
     
-    board = {}
+    board = Board()
 
     # create players
     players = []
@@ -88,8 +89,7 @@ def play(numPlayers, strategy=None, rolls=None):
     rollIdx = 0
 
     while not gameDone:
-        printBoard(players)
-        pprint(board)
+        board.printBoard(players)
 
         # take turns
         for p in players:
@@ -165,7 +165,7 @@ def play(numPlayers, strategy=None, rolls=None):
         
 
 
-    printBoard(players)
+    board.printBoard(players)
 
     print("Game Over")
     print("num turns: ", turn)
