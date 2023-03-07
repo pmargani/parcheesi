@@ -20,4 +20,4 @@ jobs:
       run: |
           python -m pip install --upgrade pip setuptools wheel 
           pip install -r requirements.txt
-          pytest --doctest-modules --junitxml=junit/test-results.xml 
+          pytest test_* --doctest-modules --junitxml=junit/test-results.xml 
