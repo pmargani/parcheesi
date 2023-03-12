@@ -39,7 +39,7 @@ class Player:
         movePiece = None
         for p in self.pieces:
             if p.position == BASE:
-                print("moving %s to start" % p)
+                # print("moving %s to start" % p)
                 p.position = self.startPosition
                 movePiece = p
                 break

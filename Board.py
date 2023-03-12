@@ -84,7 +84,7 @@ class Board:
             otherPiece = self.board[newPos][0]
             if otherPiece.player.id != piece.player.id:
                 # back to base!
-                print("Kill by %s on %s" % (piece, otherPiece))
+                # print("Kill by %s on %s" % (piece, otherPiece))
                 otherPiece.deaths += 1
                 otherPiece.position = BASE
                 self.board[newPos].pop(0)

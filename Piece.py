@@ -36,10 +36,10 @@ class Piece:
         if fromPos is None:
             fromPos = self.homePathStartPosition  
         dist = pos - fromPos
-        print('Pos ', pos, ' startPos ', fromPos, ' dist ', dist)
+        # print('Pos ', pos, ' startPos ', fromPos, ' dist ', dist)
         if (pos < fromPos):
             dist = BOARDLENGTH  - (fromPos - pos)
-            print(' wraparoudn for dist: ', dist)
+            # print(' wraparoudn for dist: ', dist)
 
         return dist
             
@@ -87,10 +87,10 @@ class Piece:
         
         # first, special cases of no motion possible    
         if self.position == BASE and step != 5:
-            print("In Base, can't advancePostion")
+            # print("In Base, can't advancePostion")
             return BASE
         if self.position >= HOME:
-            print("Already Home, can't advancePosition")
+            # print("Already Home, can't advancePosition")
             return HOME
 
         # special case of getting out of base
