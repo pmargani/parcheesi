@@ -145,7 +145,8 @@ class ParcheesiGame:
             if p.rank == 1:
                 winner = p
 
-        self.winTurns = winner.turns * self.numPlayers
+        if winner is not None:
+            self.winTurns = winner.turns * self.numPlayers
 
         if self.verbosity > 0:
             print("Game Stats: ")
