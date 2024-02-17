@@ -5,6 +5,8 @@ from pprint import pprint
 import numpy as np
 import matplotlib.pylab as plt
 
+from ParcheesiGame import ParcheesiGame
+
 # one of four corners
 # start (safe) - 1
 # 2, 3, 4, 5
@@ -49,27 +51,6 @@ import matplotlib.pylab as plt
 # So, once any pleyaer gets past pos. 64, they restart at 0.
 # once player gets past start position - 5, they jump to position 64,
 # all sharing the same home path.
-
-# from Constants import *
-# from game import *
-from ParcheesiGame import ParcheesiGame
-# from Player import Player
-# from Piece import Piece
-# from Board import Board
-
-
-
-
-
-
-
-        # check to see if it got home
-        #if pc.relativePosition() >= HOME:
-        #    pc.home = True
-
-
-                    
-
 
 
 def collectGameStats(strategy, verbose=False):
@@ -139,7 +120,9 @@ def collectGameStats(strategy, verbose=False):
 
 
 def runGames(numGames, plot=True, verbose=False):
+    "Top level entry point for running experiment with multiple games"
 
+    # TBF: how to specify strategies?
     # strategy = {
     #     MAKE_KILL : 2,
     #     GET_HOME : 1,
