@@ -1,7 +1,7 @@
 import unittest
 
 from Constants import *
-from main import play
+from game import play
 
 class TestMain(unittest.TestCase):
 

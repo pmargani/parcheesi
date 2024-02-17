@@ -1,6 +1,9 @@
 import random
 
 from Constants import *
+from Board import Board
+from Player import Player
+from Piece import Piece
 
 def allPlayersDone(players):
     "Do all the players have all their pieces at home"
@@ -281,4 +284,120 @@ def printBoard(players):
                 else:
                     s += " "
         print(s)
-    print("*"*numCols)            
+    print("*"*numCols)          
+
+def play(numPlayers, strategy=None, rolls=None, verbose=False):
+    
+    board = Board()
+
+    # create players
+    players = []
+    winners = []
+    for i in range(numPlayers):
+        p = Player(i)
+        # start al pieces off board
+        # for pc in p.pieces:
+            # pc.position = p.startPosition 
+        if verbose:    
+            print(p.getDescription())
+        players.append(p)
+
+    gameDone = False
+
+    turn = 0
+    rollIdx = 0
+
+    while not gameDone:
+        if verbose:
+            board.printBoard(players)
+
+        # take turns
+        for p in players:
+            if gameDone:
+                break
+
+            # players that are done don't get a turn
+            if p.allPiecesAtHome():
+                continue
+
+            if verbose:
+                print("Turn %d for %s" % (turn, p))
+                for pc in p.pieces:
+                    print("  %s" % pc)
+
+            # roll!
+            doubles = 0
+            rolling = True
+            while rolling:
+
+                if rolls is None:
+                    d1, d2 = roll()
+                else:
+                    d1, d2 = rolls[rollIdx]
+                    rollIdx += 1
+
+                if verbose:
+                    print(" Roll: ", d1, d2)
+
+                # check for doubles
+                if d1 != d2:
+                    # no doubles, turn is over
+                    rolling = False
+                else:
+                    # keep track of how many
+                    # doulbes we get, cause we die
+                    # after 3
+                    doubles += 1
+                    p.doubles += 1
+                    if doubles >= 3:
+                        if verbose:
+                            print("Third doubles!", d1, d2)
+                        loseBestPiece(p, board)
+                        p.doubleDeaths += 1
+                        rolling = False
+                        break
+
+                # move up to two pieces!
+                # first move
+                moved = movePiece(p, d1, board, strategy)
+                if not moved:
+                    if verbose:
+                        print("%s could not move %d" % (p, d1))
+                    p.blocked += 1
+
+                moved = movePiece(p, d2, board, strategy)    
+                if not moved:
+                    if verbose:
+                        print("%s could not move %d" % (p, d2))
+                    p.blocked += 1
+
+
+                    
+
+            if p.allPiecesAtHome():
+                p.rank = len(winners) + 1
+                winners.append(p)
+
+            # turn is done
+            turn += 1
+            p.turns += 1
+
+            # everyone home?
+            gameDone = isGameDone(players, rollIdx, rolls)
+            if gameDone:
+                break
+        
+        
+
+    if verbose:
+        board.printBoard(players)
+        print("Game Over")
+        print("num turns: ", turn)
+        print("winners: ")
+        for p in players:
+            print("%s" % p)
+            print("  was blocked %d times" % p.blocked)
+        for i, p in enumerate(winners):
+            print(i+1, " : ", str(p))
+
+    return players      
