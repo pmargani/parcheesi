@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.pylab as plt
 
 from ParcheesiGame import ParcheesiGame
+from Constants import *
 
 # one of four corners
 # start (safe) - 1
@@ -119,16 +120,17 @@ def collectGameStats(strategy, verbose=False):
     return stats, players
 
 
-def runGames(numGames, plot=True, verbose=False):
+def runGames(numGames, strategyName=None, plot=True, verbose=False):
     "Top level entry point for running experiment with multiple games"
 
-    # TBF: how to specify strategies?
-    # strategy = {
-    #     MAKE_KILL : 2,
-    #     GET_HOME : 1,
-    # }
-    strategy = None
+    # manage strategies
+    if strategyName in STRATEGIES:
+        strategy = STRATEGIES[strategyName]
+    else:
+        strategy = None
 
+    # init stats
+    # TBF: make this a class?
     allStats = {
         'winTurns': [],
         'turns': [],
@@ -171,6 +173,7 @@ def runGames(numGames, plot=True, verbose=False):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--numGames", help="number of games to run in the simulation", type=int, default=100)
+    parser.add_argument("--strategy", help="name of strategy to play game with", type=str, default=None)
     parser.add_argument("--plot", help="plot results?", action='store_true')
     parser.add_argument("--verbose", help="print results?", action='store_true')
     args = parser.parse_args()
@@ -178,7 +181,22 @@ def main():
     print(f"numGames: {args.numGames}")
     print(f"plot: {args.plot}")
     print(f"verbose: {args.verbose}")
-    runGames(args.numGames, plot=args.plot, verbose=args.verbose)
+    print(f"strategy name: {args.strategy}")
 
+    strategyNames = ",".join(STRATEGIES.keys())
+
+    valid = True
+    if args.numGames < 1:
+        print(f"ERROR: you must play one or more games")
+        valid = False
+    if args.strategy is not None and args.strategy not in STRATEGIES:
+        print(f"ERROR: strategy {args.strategy} not in list {strategyNames}")    
+        valid = False
+
+    if valid:
+        runGames(args.numGames, plot=args.plot, verbose=args.verbose)
+
+    print(f"Parcheesi Game Simulations Complete")
+    
 if __name__ == '__main__':
     main()
