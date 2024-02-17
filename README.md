@@ -60,6 +60,20 @@ A lot of these choices can be thought of in terms of offensive, or defensive mov
    * does maintaining a blockade to keep opponent pieces from advancing worth the fact that these pieces in the blockade themselves are not advancing?  Even when there are other pieces that do get advanced?
    * when rolling a five and there are pieces in the nest, should the priority be to get these pieces out, over possibly securing or advancing other pieces?
 
+## Installation and Running
+
+The usual steps can be done for building the needed virtual environment:
+   * python -m venv $VIRTUAL_ENV
+   * source $VIRTUAL_ENV
+   * cd parcheesi
+   * pip install --upgrade pip
+   * pip install -r requirements.txt
+
+Running things:
+   * tests: pytest test_*
+   * to run simulations given parameters in main.py: python main.py
+
+      
 ## Design
 
 We take a standard Object Oriented Programming approach, with classes representing pieces and players.  The board itself is represented as a list of numbers representing positions on the board.  A pygame interface is being implemented to visualize the game play and enable human vs. computer games, but is a work in progress.
