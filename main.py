@@ -1,4 +1,5 @@
 import random
+import argparse
 from pprint import pprint
 
 import numpy as np
@@ -68,7 +69,7 @@ from Board import Board
 
                     
 
-def play(numPlayers, strategy=None, rolls=None):
+def play(numPlayers, strategy=None, rolls=None, verbose=False):
     
     board = Board()
 
@@ -80,7 +81,8 @@ def play(numPlayers, strategy=None, rolls=None):
         # start al pieces off board
         # for pc in p.pieces:
             # pc.position = p.startPosition 
-        print(p.getDescription())
+        if verbose:    
+            print(p.getDescription())
         players.append(p)
 
     gameDone = False
@@ -89,7 +91,8 @@ def play(numPlayers, strategy=None, rolls=None):
     rollIdx = 0
 
     while not gameDone:
-        board.printBoard(players)
+        if verbose:
+            board.printBoard(players)
 
         # take turns
         for p in players:
@@ -100,9 +103,10 @@ def play(numPlayers, strategy=None, rolls=None):
             if p.allPiecesAtHome():
                 continue
 
-            print("Turn %d for %s" % (turn, p))
-            for pc in p.pieces:
-                print("  %s" % pc)
+            if verbose:
+                print("Turn %d for %s" % (turn, p))
+                for pc in p.pieces:
+                    print("  %s" % pc)
 
             # roll!
             doubles = 0
@@ -115,7 +119,8 @@ def play(numPlayers, strategy=None, rolls=None):
                     d1, d2 = rolls[rollIdx]
                     rollIdx += 1
 
-                print(" Roll: ", d1, d2)
+                if verbose:
+                    print(" Roll: ", d1, d2)
 
                 # check for doubles
                 if d1 != d2:
@@ -128,7 +133,8 @@ def play(numPlayers, strategy=None, rolls=None):
                     doubles += 1
                     p.doubles += 1
                     if doubles >= 3:
-                        print("Third doubles!", d1, d2)
+                        if verbose:
+                            print("Third doubles!", d1, d2)
                         loseBestPiece(p, board)
                         p.doubleDeaths += 1
                         rolling = False
@@ -138,12 +144,14 @@ def play(numPlayers, strategy=None, rolls=None):
                 # first move
                 moved = movePiece(p, d1, board, strategy)
                 if not moved:
-                    print("%s could not move %d" % (p, d1))
+                    if verbose:
+                        print("%s could not move %d" % (p, d1))
                     p.blocked += 1
 
                 moved = movePiece(p, d2, board, strategy)    
                 if not moved:
-                    print("%s could not move %d" % (p, d2))
+                    if verbose:
+                        print("%s could not move %d" % (p, d2))
                     p.blocked += 1
 
 
@@ -164,26 +172,25 @@ def play(numPlayers, strategy=None, rolls=None):
         
         
 
-
-    board.printBoard(players)
-
-    print("Game Over")
-    print("num turns: ", turn)
-    print("winners: ")
-    for p in players:
-        print("%s" % p)
-        print("  was blocked %d times" % p.blocked)
-    for i, p in enumerate(winners):
-        print(i+1, " : ", str(p))
+    if verbose:
+        board.printBoard(players)
+        print("Game Over")
+        print("num turns: ", turn)
+        print("winners: ")
+        for p in players:
+            print("%s" % p)
+            print("  was blocked %d times" % p.blocked)
+        for i, p in enumerate(winners):
+            print(i+1, " : ", str(p))
 
     return players
 
-def collectGameStats(strategy):
+def collectGameStats(strategy, verbose=False):
     "Play the game, and return stats"
 
     # play the game!
     numPlayers = 4
-    players = play(numPlayers, strategy)
+    players = play(numPlayers, strategy, verbose=verbose)
 
     # collect all the stats from the players
     winner = 0
@@ -191,15 +198,16 @@ def collectGameStats(strategy):
     totalDeaths = totalKills = 0
 
     for p in players:
-        print("")
-        print("%s" % p)
-        print("  Finished: %d" % p.rank)
-        print("  num turns: %d" % p.turns)
-        print("  num kills: %d" % p.getKills())
-        print("  num deaths: %d" % p.getDeaths())
-        print("  num doubles: %d" % p.doubles)
-        print("  num deaths by doubles: %d" % p.doubleDeaths)
-        print("  was blocked %d times" % p.blocked)
+        if verbose:
+            print("")
+            print("%s" % p)
+            print("  Finished: %d" % p.rank)
+            print("  num turns: %d" % p.turns)
+            print("  num kills: %d" % p.getKills())
+            print("  num deaths: %d" % p.getDeaths())
+            print("  num doubles: %d" % p.doubles)
+            print("  num deaths by doubles: %d" % p.doubleDeaths)
+            print("  was blocked %d times" % p.blocked)
         totalTurns += p.turns
         totalBlocks += p.blocked
         totalDoubles += p.doubles
@@ -210,20 +218,21 @@ def collectGameStats(strategy):
         if p.rank == 1:
             winner = p
 
-    print("")
-    print("Total turns", totalTurns)
-    print("Total kills", totalKills)
-    print("Total deaths", totalDeaths)
-    print("Total blocks", totalBlocks)
-    print("Total doubles", totalDoubles)
-    print("Total deaths by doubles", totalDoubleDeaths)
+    if verbose:
+        print("")
+        print("Total turns", totalTurns)
+        print("Total kills", totalKills)
+        print("Total deaths", totalDeaths)
+        print("Total blocks", totalBlocks)
+        print("Total doubles", totalDoubles)
+        print("Total deaths by doubles", totalDoubleDeaths)
 
     gameTurns = winner.turns * numPlayers
-    print("Game won after %d turns" % gameTurns)
-
     minPerTurn = .5
 
-    print("Game time for %f minutes per turn: %f" % (minPerTurn, minPerTurn*gameTurns))
+    if verbose:
+        print("Game won after %d turns" % gameTurns)
+        print("Game time for %f minutes per turn: %f" % (minPerTurn, minPerTurn*gameTurns))
 
     stats = {
         'winTurns': gameTurns,
@@ -238,13 +247,7 @@ def collectGameStats(strategy):
     return stats, players
 
 
-def main():
-
-    #rolls = [(5,5)]
-    # play(4, rolls=rolls)
-    #play(4)
-    numGames = 100
-
+def runGames(numGames, plot=True, verbose=False):
 
     # strategy = {
     #     MAKE_KILL : 2,
@@ -263,13 +266,14 @@ def main():
     }
 
     for i in range(numGames):
-        stats, players = collectGameStats(strategy)
+        stats, players = collectGameStats(strategy, verbose=verbose)
         for k, v in stats.items():
             allStats[k].append(v)
 
     
     for k, v in allStats.items():
-        print("%s: mean=%f, std=%f" % (k, np.mean(v), np.std(v)))    
+        if verbose:
+            print("%s: mean=%f, std=%f" % (k, np.mean(v), np.std(v)))    
         meanStr = "mean=%5.2f, std=%5.2f" % (np.mean(v), np.std(v))
 
         num_bins = 20
@@ -281,11 +285,26 @@ def main():
         #print("x:",x)
         #plt.text(x, .8, meanStr, style='italic',
         #bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 10})
+        if not plot:
+            continue
+
         plt.xlabel(k)
         plt.ylabel("#")
         plt.title("%s from %d games (%s)" % (k, numGames, meanStr))
         plt.savefig("%s.png" % k)
         plt.show()
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--numGames", help="number of games to run in the simulation", type=int, default=100)
+    parser.add_argument("--plot", help="plot results?", action='store_true')
+    parser.add_argument("--verbose", help="print results?", action='store_true')
+    args = parser.parse_args()
+
+    print(f"numGames: {args.numGames}")
+    print(f"plot: {args.plot}")
+    print(f"verbose: {args.verbose}")
+    runGames(args.numGames, plot=args.plot, verbose=args.verbose)
 
 if __name__ == '__main__':
     main()

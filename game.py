@@ -183,7 +183,7 @@ def pickOption(options, strategy):
     return maxOpt
             
 
-def moveLegal(player, die, board):
+def moveLegal(player, die, board, verbose=False):
     """
     Make a legal move, using this strategy:
        * if you can get piece to start, do that
@@ -202,10 +202,12 @@ def moveLegal(player, die, board):
         # board[pc.startPosition].append(pc) 
         pc = movePieceToStart(player, board)
         moved = True  
-        print("Moving piece %s to start" % pc)
+        if verbose:
+            print("Moving piece %s to start" % pc)
     elif canGetPieceHome(player, die, board):
         pc = getPieceHome(player, die, board)
-        print("Moving piece %s to HOME" % pc)
+        if verbose:
+            print("Moving piece %s to HOME" % pc)
 
         moved = True
     else:    
@@ -216,7 +218,8 @@ def moveLegal(player, die, board):
                 newPos = pc.getNextPosition(die)
                 # newPos = pc.position
                 if isMoveLegal(pc, die, board):
-                    print("moving piece %s to %d" % (pc, newPos))
+                    if verbose:
+                        print("moving piece %s to %d" % (pc, newPos))
                     pc.position = newPos
                     # updateBoard(pc, oldPos, newPos, board)
                     board.update(pc, oldPos, newPos)
