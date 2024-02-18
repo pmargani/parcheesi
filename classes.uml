@@ -1,0 +1,113 @@
+@startuml
+
+skin rose
+
+title Parcheesi Class Diagram
+
+
+class Board {
+  board
+  update()
+  movePieceToStart()
+  removeFromBoard()
+  isStartOpen()
+  numPiecesOnBoard()
+  isOccupiedByPlayer()
+  isOccupiedByOtherPlayer()
+  printBoard()
+}
+
+class Piece {
+  player 
+  startPosition
+  homePathStartPosition
+  startPosition
+  kills
+  deaths
+  relativePosition()
+  isOnBoard()
+  isAtBase()
+  isAtHome()
+  isInHomePath()
+  isOnHomeBoard()
+  distanceFromStart()
+  advancePostion()
+  pastHomeStartPosition()
+  getNextPosition()
+  canGetHome()
+}
+
+class Player {
+  pieces 
+  color
+  homePathStartPosition 
+  startPosition 
+  rank 
+  blocked 
+  turns 
+  doubles 
+  doubleDeaths 
+  getDescription()
+  movePieceToStart()
+  getBestPieceOnBoard()
+  pieceCanGetHome()
+  hasPieceAtBase()
+  allPiecesAtHome()
+  getKills()
+  getDeaths()
+  
+}
+
+class ParcheesiGame {
+    board 
+    players 
+    numPlayers 
+    rolls 
+    strategy 
+    turn 
+    play()
+    allPlayersDone()
+    hasLegalMove()
+    nextTurn()
+    roll()
+    isGameDone()
+    moveSimple()
+    canMovePieceOutOfBase()
+    canGetPieceHome()
+    getPieceHome()
+    movePieceToStart()
+    movePiece()
+    moveViaStrategy()
+    pickOption()
+    moveLegal()
+    getMoveOption()
+    loseBestPieces()
+    
+}
+
+class Experiment {
+    expName 
+    expStats
+    playerStats
+    numGames 
+    numPlayers 
+    strategy 
+    
+}
+
+class Stats {
+    winTurns
+    turns
+    blocks
+    kills
+    deaths
+    doubles
+    doubleDeaths
+}
+
+Player <-- Piece
+ParcheesiGame <-- Board
+ParcheesiGame <-- Player
+Experiment <-- Stats 
+
+@enduml

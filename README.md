@@ -73,22 +73,24 @@ Running things:
    * tests: pytest test_*
    * to run simulations given parameters in main.py: python main.py
 
-      
+
 ## Design
 
 We take a standard Object Oriented Programming approach, with classes representing pieces and players.  The board itself is represented as a list of numbers representing positions on the board.  A pygame interface is being implemented to visualize the game play and enable human vs. computer games, but is a work in progress.
 
-Currently the game rules are mostly implemented in functions in a game module.  The game and the module should become classes themselves it seems.
+<img src="images/classes.png" alt="classes.png" width="500">
 
-In regards to strategies, there is only one current very simple strategy:
+In regards to strategies, these can be selected.  The default strategy is very simple:
    * always get a piece out of the nest when possible
    * simply take the first legal move available to the piece that is furthest ahead
 
-Obviously there is no regard for offensive or defensive moves yet.
+
 
 ## Current Results
 
-Currently the only thing we can do is play a full game with randomized dice rolls and the above mentioned strategy.  But we can collect metrics such as how many turns the game takes, how many times each player is blocked or sent back to the nest, etc.
+### Basic Results for simple strategy
+
+In this case we play a full game with randomized dice rolls and the above mentioned simple strategy.  We can collect metrics such as how many turns the game takes, how many times each player is blocked or sent back to the nest, etc.
 
 Here are some results from running the game 10,000 times using the one above mentioned, simple strategy:
 
