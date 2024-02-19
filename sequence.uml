@@ -1,0 +1,30 @@
+participant Experiment as E 
+participant Stats as S 
+participant ParcheesiGame as G
+participant Player as P
+participant Piece as C
+participant Board as B
+
+E -> S: ctor -> ctor
+E -> G: run -> ctor
+G -> B: ctor -> ctor
+G -> P: ctor -> ctor
+P -> C: ctor -> ctor
+E -> G: run -> play
+Note left of G: enter while loop\nuntil all players home
+G -> P: play -> allPiecesAtHome
+G -> G: play -> roll
+G -> G: play -> movePiece
+G -> G: movePiece -> getMoveOptions
+G -> G: movePiece -> moveViaStrategy
+G -> G: moveViaStrategy -> pickOption
+Note left of G: pick option with\nhighest score
+G -> C: moveViaStrategy -> getNextPosition
+G -> B: moveViaStrategy -> update
+Note left of G: handle consequences\nof move (like kills)
+G -> G: play -> movePiece
+Note left of G: only if we can\nmove second piece
+G -> P: play -> allPiecesAtHome
+G -> G: play -> isGameDone
+Note left of G: if game is not done\nback to top of loop
+E -> E: run -> plotResults

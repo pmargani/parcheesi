@@ -92,6 +92,7 @@ class ParcheesiGame:
                             rolling = False
                             break
 
+                    # TBF: not handling moving single piece d1+d2!
                     # move up to two pieces!
                     # first move
                     moved = self.movePiece(p, d1, self.strategy)
@@ -388,7 +389,13 @@ class ParcheesiGame:
         return moved
 
     def getMoveOptions(self, player, die):
+        """
+        Given a player and a single die value, return a list of
+        tuples of (move type, piece).  This can then be used to
+        compare against strategies to determine best move.
+        """
 
+        # TBF: use constants instead of these strings below
         options = []
         if self.canMovePieceOutOfBase(player, die):
             options.append(('START_PIECE', None))

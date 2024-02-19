@@ -76,9 +76,11 @@ Running things:
 
 ## Design
 
-We take a standard Object Oriented Programming approach, with classes representing pieces and players.  The board itself is represented as a list of numbers representing positions on the board.  A pygame interface is being implemented to visualize the game play and enable human vs. computer games, but is a work in progress.
+We take a standard Object Oriented Programming approach, with classes representing pieces, players, etc.  The board itself is represented as a list of numbers representing positions on the board.  A pygame interface is being implemented to visualize the game play and enable human vs. computer games, but is a work in progress.
 
 <img src="images/classes.png" alt="classes.png" width="500">
+
+<img src="images/sequence.png" alt="sequence.png" width="500">
 
 In regards to strategies, these can be selected.  The default strategy is very simple:
    * always get a piece out of the nest when possible
